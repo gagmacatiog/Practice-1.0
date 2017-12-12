@@ -35,17 +35,17 @@
             // label1
             // 
             this.label1.Font = new System.Drawing.Font("Century Gothic", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(-2, 118);
+            this.label1.Location = new System.Drawing.Point(41, 25);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(285, 23);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Cashier 1";
+            this.label1.Text = "Queue #";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label2
             // 
             this.label2.Font = new System.Drawing.Font("Century Gothic", 80F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(-3, -1);
+            this.label2.Location = new System.Drawing.Point(40, 59);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(286, 119);
             this.label2.TabIndex = 1;
@@ -57,7 +57,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.AppWorkspace;
-            this.ClientSize = new System.Drawing.Size(284, 155);
+            this.ClientSize = new System.Drawing.Size(391, 310);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;

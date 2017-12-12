@@ -12,9 +12,23 @@ namespace ServicingTerminalApplication
 {
     public partial class Form3 : Form
     {
+        private Form1 f1;
         public Form3()
         {
             InitializeComponent();
+            
+        }
+        public string LabelText
+        {
+            get
+            {
+                return this.label1.Text;
+            }
+            set
+            {
+                this.label1.Text = value;
+                this.Refresh();
+            }
         }
     }
 }
