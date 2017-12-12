@@ -6,6 +6,7 @@ using System.Windows.Forms;
 
 namespace ServicingTerminalApplication
 {
+    
     public partial class Form1 : Form
     {
         bool clickCheck = false;
@@ -23,7 +24,7 @@ namespace ServicingTerminalApplication
         private static string full_name = string.Empty;
         private static string transaction_type = string.Empty;
         private static string type = string.Empty;
-
+        Form3 fnf = new Form3();
         public Form1()
         {
             InitializeComponent();
@@ -32,6 +33,22 @@ namespace ServicingTerminalApplication
                                       workingArea.Bottom - Size.Height);
             this.TopMost = true;
 
+            fnf.FirstNameUpdated += Fnf_FirstNameUpdated;
+            fnf.Show();
+
+
+        }
+
+        private void Fnf_FirstNameUpdated(object sender, updateForm e)
+        {
+            if(e != null && e.id != null)
+            {   fnf.Label2 = e.id;
+                fnf.Label4 = e.s_id;
+                fnf.Label6 = e.full_name;
+                fnf.Label8 = e.transaction_type;
+                fnf.Label10 = e.type;
+
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -87,11 +104,16 @@ namespace ServicingTerminalApplication
                 con.Close();
 
             }
+            
+            updateForm nuea = new updateForm();
+            nuea.id = id;
+            nuea.type = type;
+            nuea.s_id = s_id;
+            nuea.full_name = full_name;
+            nuea.transaction_type = transaction_type;
+            fnf.OnFirstNameUpdated(nuea);
 
-            f3.LabelText = "aa";
-            f3.Refresh();
-            f3.LabelText = "fff";
-           
+
         }
 
         private void button2_Click(object sender, EventArgs e)
