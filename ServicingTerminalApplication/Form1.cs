@@ -14,11 +14,6 @@ namespace ServicingTerminalApplication
         Form3 f3 = (Form3)Application.OpenForms["form3"];
         private String connection_string = System.Configuration.ConfigurationManager.ConnectionStrings["dbString"].ConnectionString;
         static int ServicingOffice;
-        //public string id { get; }
-        //public string s_id { get; }
-        //public string full_name { get; }
-        //public string transaction_type { get; }
-        //public string type { get; }
         private static string id = string.Empty;
         private static string s_id = string.Empty;
         private static string full_name = string.Empty;
