@@ -171,17 +171,22 @@ namespace ServicingTerminalApplication
                     string q_s = rdr["Status"].ToString();
                     tempCounter = (int)rdr["Counter"];
 
-                    //Increment goes here
-                    Console.Write(" \n incrementing q_cn [Queue_Current_Number \n ");
-                    q_cn++;
-                    Console.Write(" \n ** Calling Mode_Check with con and tempCounter (current mode counter) ** \n ");
-                    Mode_Check(con,tempCounter);
+                    if (q_cn < getQueueNumber(con, Servicing_Office))
+                    {
+                        //Increment goes here
+                        Console.Write(" \n incrementing q_cn [Queue_Current_Number] \n ");
+                        q_cn++;
+                        Console.Write(" \n ** Calling Mode_Check with con and tempCounter (current mode counter) ** \n ");
+                        Mode_Check(con, tempCounter);
 
-                    cmd2.Parameters.AddWithValue("@q_cn", q_cn);
-                    cmd2.Parameters.AddWithValue("@q_cntr", modeCounter);
-                    cmd2.Parameters.AddWithValue("@Servicing_Office", Servicing_Office);
-                    Console.Write("Writing to database...");
-                    cmd2.ExecuteNonQuery();
+                        cmd2.Parameters.AddWithValue("@q_cn", q_cn);
+                        cmd2.Parameters.AddWithValue("@q_cntr", modeCounter);
+                        cmd2.Parameters.AddWithValue("@Servicing_Office", Servicing_Office);
+                        Console.Write("Writing to database...");
+                        cmd2.ExecuteNonQuery();
+                        setCustomerInformation(con, (q_cn-1));
+                    }
+                    else { MessageBox.Show("No customers on queue."); }
 
                 }
                 else
@@ -192,6 +197,54 @@ namespace ServicingTerminalApplication
             }
             con.Close();
 
+        }
+        private int getQueueNumber(SqlConnection con, int q_so)
+        {
+            // retrieves queue number
+            int res = 0;
+
+            SqlCommand cmd3;
+            String query = "select Current_Queue from Queue_Info where Servicing_Office = @Servicing_Office";
+            cmd3 = new SqlCommand(query, con);
+            cmd3.Parameters.AddWithValue("@Servicing_Office", q_so);
+            SqlDataReader rdr2;
+            rdr2 = cmd3.ExecuteReader();
+            while (rdr2.Read()) { res = (int)rdr2["Current_Queue"]; }
+            Console.Write("--RETURNING-> getQueueNumber[" + res + "]");
+            
+            return res;
+        }
+        private void setCustomerInformation(SqlConnection con, int q_cn) {
+
+            SqlCommand cmd4;
+            String query = "select TOP 1 Queue_Number,Type,Student_No,Full_name,Transaction_Type from Main_Queue where Queue_Number = @q_cn";
+            cmd4 = new SqlCommand(query,con);
+
+            cmd4.Parameters.AddWithValue("@q_cn", q_cn);
+
+            SqlDataReader rdr3;
+            rdr3 = cmd4.ExecuteReader();
+            while (rdr3.Read()) {
+                id = rdr3["Queue_Number"].ToString();
+                type = ((Boolean)rdr3["Type"] == false) ? "Student" : "Guest";
+                s_id = rdr3["Student_No"].ToString();
+                full_name = rdr3["Full_name"].ToString();
+                transaction_type = rdr3["Transaction_Type"].ToString();
+            }
+            updateForm nuea = new updateForm();
+            nuea.id = id;
+            nuea.type = type;
+            nuea.s_id = s_id;
+            nuea.full_name = full_name;
+            nuea.transaction_type = transaction_type;
+            fnf.OnFirstNameUpdated(nuea);
+            //nuea.id = "wew";
+            //nuea.type = "wew";
+            //nuea.s_id = "wew";
+            //nuea.full_name = "wew";
+            //nuea.transaction_type = "wew";
+            //fnf.OnFirstNameUpdated(nuea);
+            Console.Write("updating using fnf...");
         }
         private void Transfer_Customer_Logs() { }
         private void Transfer_Customer_Office() { }
