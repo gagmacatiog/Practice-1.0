@@ -14,6 +14,7 @@ namespace ServicingTerminalApplication
         Form3 f3 = (Form3)Application.OpenForms["form3"];
         private String connection_string = System.Configuration.ConfigurationManager.ConnectionStrings["dbString"].ConnectionString;
         static int Servicing_Office = 1;
+        static int window = 1;
         static int modeCounter = 0;
         private static string id = string.Empty;
         private static string s_id = string.Empty;
@@ -150,7 +151,7 @@ namespace ServicingTerminalApplication
                 cmd2.CommandType = CommandType.Text;
 
                 String query = "select * from Queue_Info where Servicing_Office = @Servicing_Office";
-                String query2 = "update Queue_Info set Current_Number = @q_cn, Counter = @q_cntr where Servicing_Office = @Servicing_Office";
+                String query2 = "update Queue_Info set Current_Number = @q_cn, Counter = @q_cntr, Window = @q_w where Servicing_Office = @Servicing_Office";
 
                 cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@Servicing_Office", Servicing_Office);
@@ -182,6 +183,7 @@ namespace ServicingTerminalApplication
                         cmd2.Parameters.AddWithValue("@q_cn", q_cn);
                         cmd2.Parameters.AddWithValue("@q_cntr", modeCounter);
                         cmd2.Parameters.AddWithValue("@Servicing_Office", Servicing_Office);
+                        cmd2.Parameters.AddWithValue("@q_w", window);
                         Console.Write("Writing to database...");
                         cmd2.ExecuteNonQuery();
                         setCustomerInformation(con, (q_cn-1));
@@ -286,19 +288,13 @@ namespace ServicingTerminalApplication
         private int return_on_queue(SqlConnection con)
         {
             int a = 0;
-
-            SqlCommand cmd3 = con.CreateCommand();
+            String query4 = "select count(*) as a from Main_Queue where Servicing_Office = @sn";
+            SqlCommand cmd3 = new SqlCommand(query4, con);
             SqlDataReader rdr2;
-            cmd3.CommandText = "return_total_queue";
-            cmd3.CommandType = CommandType.StoredProcedure;
-            cmd3.Parameters.AddWithValue("ServicingOffice", Servicing_Office);
-            cmd3.Connection = con;
+            cmd3.Parameters.AddWithValue("@sn", Servicing_Office);
             rdr2 = cmd3.ExecuteReader();
-            while (rdr2.Read()) {
-                Console.Write("AAAAAAAAAAAAAAAAAAAAAAA"+(int)rdr2["a"]);
-                a = (int)rdr2["a"];
-            }
-
+            while (rdr2.Read()) { a = (int)rdr2["a"]; }
+            //execute return_total_queue
             return a;
         }
         private void Fnf_FirstNameUpdated(object sender, updateForm e)
