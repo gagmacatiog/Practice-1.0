@@ -21,8 +21,11 @@ namespace ServicingTerminalApplication
         private static string full_name = string.Empty;
         private static string transaction_type = string.Empty;
         private static string type = string.Empty;
+        private static int _pattern_max;
+        private static int _pattern_current;
         //private static int
         DataTable table_Modes;
+        DataTable table_Transactions;
         Form3 fnf = new Form3();
         public Form1()
         {
@@ -36,10 +39,47 @@ namespace ServicingTerminalApplication
             fnf.Show();
             Console.Write("\n Initializing form... Calling getModes() to set table_Modes \n ");
             table_Modes = getModes();
+            table_Transactions = getTransactionInfo();
+            _pattern_max = 0;
+            _pattern_current = 0;
 
+        }
+        private DataTable getTransactionInfo()
+        {
+            // *This function is only to be used once every program run.
+            //  Retrieves list of possible Transaction Names from the database
+            //  and stores them on the program.
+            DataTable transactionType = new DataTable();
+            transactionType.Columns.Add("Transaction_Type", typeof(int));
+            transactionType.Columns.Add("Transaction_Name", typeof(string));
+            SqlConnection con = new SqlConnection(connection_string);
+            using (con)
+            {
+                con.Open();
+                SqlCommand m_cmd = con.CreateCommand();
+                SqlDataReader m_rdr;
+
+                String m_q = "select * from Transaction_Type";
+                m_cmd = new SqlCommand(m_q, con);
+
+                m_rdr = m_cmd.ExecuteReader();
+                while (m_rdr.Read())
+                {
+                    transactionType.Rows.Add(
+                        (int)m_rdr["id"],
+                        (string)m_rdr["Transaction_Name"]);
+                    Console.Write(" getTransactions -> Added a row! ");
+                }
+                con.Close();
+            }
+            Console.Write(" \n returning transactionType... \n ");
+            return transactionType;
         }
 
         private DataTable getModes(){
+            // *This function is only to be used once every program run.
+            //  Retrieves list of possible queueing modes from the database
+            //  and stores them on the program.
             DataTable modeList = new DataTable();
             modeList.Columns.Add("Mode_Number",typeof(int));
             modeList.Columns.Add("Mode_Name",typeof(string));
@@ -81,62 +121,6 @@ namespace ServicingTerminalApplication
             Console.Write(" \n ** Calling function Set_Information_Queue() ** \n ");
             //This function increments queue and retrives information about the queue
             Set_Information_Queue(con);
-            //using (con)
-            //{
-            //    con.Open();
-            //    SqlCommand cmd = con.CreateCommand();
-            //    SqlCommand cmd2 = con.CreateCommand();
-            //    SqlCommand cmd3 = con.CreateCommand();
-            //    cmd.CommandType = CommandType.Text;
-            //    cmd2.CommandType = CommandType.Text;
-
-            //    String query = "select * from Queue_Info where Servicing_Office = @Servicing_Office";
-            //    String query2 = "select * from Main_Queue where Servicing_Office = @Servicing_Office";
-
-            //    cmd = new SqlCommand(query, con);
-            //    cmd.Parameters.AddWithValue("@Servicing_Office", Servicing_Office);
-            //    cmd2 = new SqlCommand(query2, con);
-            //    cmd2.Parameters.AddWithValue("@Servicing_Office", Servicing_Office);
-
-
-            //    SqlDataReader rdr;
-            //    SqlDataReader rdr2;
-
-            //    //Transferring previous customer to logs
-            //    rdr2 = cmd2.ExecuteReader();
-            //    while (rdr2.Read()) {
-            //        String c_qn = (int)rdr2["Queue_Number"];
-            //        int c_so = Servicing_Office;
-            //        String c_sn = rdr2["Student_No"].ToString();
-            //        String c_tt = rdr2["Transaction_Type"]
-            //    }
-
-
-            //    //Selecting Customer
-
-
-
-
-            //    rdr = cmd.ExecuteReader();
-            //    int rowCount = 0;
-            //    while (rdr.Read())
-            //    { rowCount++; { if (rowCount > 0) { break; } } }
-            //    if (rowCount > 0)
-            //    {
-            //        string q_cn = rdr["Current_Number"].ToString();
-            //        string q_m = rdr["Mode"].ToString();
-            //        string q_s = rdr["Status"].ToString();
-            //        modeCounter = (int)rdr["Counter"];
-            //    }
-            //    else
-            //    {
-            //        MessageBox.Show("No queueing data found. Please start an instance of a serving kiosk first.");
-            //    }
-
-            //}
-            //con.Close();
-
-
 
         }
         private void Set_Information_Queue(SqlConnection con) {
@@ -186,7 +170,6 @@ namespace ServicingTerminalApplication
                         cmd2.Parameters.AddWithValue("@q_w", window);
                         Console.Write("Writing to database...");
                         cmd2.ExecuteNonQuery();
-                        Console.Write("Writing to database...");
                         setCustomerInformation(con, (q_cn-1));
                     }
                     else { MessageBox.Show("No customers on queue."); }
@@ -219,12 +202,19 @@ namespace ServicingTerminalApplication
         }
         private void setCustomerInformation(SqlConnection con, int q_cn) {
 
-            SqlCommand cmd4;
-            String query = "select TOP 1 Queue_Number,Type,Student_No,Full_name,Transaction_Type from Main_Queue where Queue_Number = @q_cn";
+            // Called when next button is clicked.
+            // Calls consecutive functions for the next customer to be served.
+
+            SqlCommand cmd4, _cmd4, _cmd0;
+            String query = "select TOP 1 Queue_Number,Type,Student_No,Full_name,Transaction_Type,Pattern_Current,Pattern_Max from Main_Queue where Queue_Number = @q_cn and Servicing_Office = @sn";
+            String _query_insert = "update Main_Queue set Pattern_Current = Pattern_Current + 1 where Queue_Number = @q_cn and Servicing_Office = @sn";
+            String _query_delete = "delete from Main_Queue where Queue_Number = @q_cn and Servicing_Office = @sn";
+            Console.Write(" \n \n deleting from main queue qn = " + q_cn + " ;; sn = " + Servicing_Office);
+            String _query_delete_queue_pattern = "delete from Queue_Transaction where Main_Queue_ID = @q_cn and Pattern_No = @q_pn";
             cmd4 = new SqlCommand(query,con);
 
             cmd4.Parameters.AddWithValue("@q_cn", q_cn);
-
+            cmd4.Parameters.AddWithValue("@sn", Servicing_Office);
             SqlDataReader rdr3;
             rdr3 = cmd4.ExecuteReader();
             while (rdr3.Read()) {
@@ -232,7 +222,35 @@ namespace ServicingTerminalApplication
                 type = ((Boolean)rdr3["Type"] == false) ? "Student" : "Guest";
                 s_id = rdr3["Student_No"].ToString();
                 full_name = rdr3["Full_name"].ToString();
-                transaction_type = rdr3["Transaction_Type"].ToString();
+                _pattern_max = (int)rdr3["Pattern_Max"];
+                _pattern_current = (int)rdr3["Pattern_Current"];
+                foreach (DataRow row in table_Transactions.Rows)
+                {
+                    int _id = (int)row["Transaction_Type"];
+                    if (_id == (int)rdr3["Transaction_Type"])
+                    {
+                        transaction_type = (String)row["Transaction_Name"];
+                    }
+                }
+
+                if (_pattern_current <= _pattern_max)
+                {
+                    _cmd4 = new SqlCommand(_query_insert, con);
+                    _cmd4.Parameters.AddWithValue("@q_cn", q_cn);
+                    _cmd4.Parameters.AddWithValue("@sn", Servicing_Office);
+                    _cmd4.ExecuteNonQuery();
+                }
+                else
+                {
+                    _cmd4 = new SqlCommand(_query_delete, con);
+                    _cmd4.Parameters.AddWithValue("@q_cn", q_cn);
+                    _cmd4.ExecuteNonQuery();
+                }
+                Console.Write("\n\n using _cmd0 -- q_cn = " + q_cn + " _pattern_current = " + _pattern_current);
+                _cmd0 = new SqlCommand(_query_delete_queue_pattern, con);
+                _cmd0.Parameters.AddWithValue("@q_cn", q_cn);
+                _cmd0.Parameters.AddWithValue("@q_pn", _pattern_current);
+                _cmd0.ExecuteNonQuery();
             }
             updateForm nuea = new updateForm();
             nuea.id = id;
@@ -258,9 +276,10 @@ namespace ServicingTerminalApplication
 
             current_queue_number = return_on_queue(con);
 
-
             foreach (DataRow row in table_Modes.Rows)
             {
+                // checks what mode is to be used when serving customers on queue
+                // January 30, 2018 -- please recheck if working on different [Servicing Offices]
                 mode_number = (int)row["Mode_Number"];
                 mode_name = row["Mode_Name"].ToString();
                 min = (int)row["Min"];
@@ -288,6 +307,7 @@ namespace ServicingTerminalApplication
         }
         private int return_on_queue(SqlConnection con)
         {
+            // counts how many customers on queue at a [Servicing Office]
             int a = 0;
             String query4 = "select count(*) as a from Main_Queue where Servicing_Office = @sn";
             SqlCommand cmd3 = new SqlCommand(query4, con);
@@ -295,11 +315,12 @@ namespace ServicingTerminalApplication
             cmd3.Parameters.AddWithValue("@sn", Servicing_Office);
             rdr2 = cmd3.ExecuteReader();
             while (rdr2.Read()) { a = (int)rdr2["a"]; }
-            //execute return_total_queue
+            // execute return_total_queue
             return a;
         }
         private void Fnf_FirstNameUpdated(object sender, updateForm e)
         {
+            // to be used to show data on form #3
             if(e != null && e.id != null)
             {   fnf.Label2 = e.id;
                 fnf.Label4 = e.s_id;
