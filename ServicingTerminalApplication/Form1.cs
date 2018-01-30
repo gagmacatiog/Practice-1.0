@@ -186,6 +186,7 @@ namespace ServicingTerminalApplication
                         cmd2.Parameters.AddWithValue("@q_w", window);
                         Console.Write("Writing to database...");
                         cmd2.ExecuteNonQuery();
+                        Console.Write("Writing to database...");
                         setCustomerInformation(con, (q_cn-1));
                     }
                     else { MessageBox.Show("No customers on queue."); }
