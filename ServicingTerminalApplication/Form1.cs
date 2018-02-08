@@ -48,6 +48,38 @@ namespace ServicingTerminalApplication
             _pattern_current = 0;
 
         }
+        private void updateQueueNumber(SqlConnection con, int id)
+        {}
+        private void incrementQueueNumber(SqlConnection con, int q_so)
+        {
+            // increment queue number 
+            SqlCommand cmd4;
+            String query2 = "update Queue_Info set Current_Queue = Current_Queue+1 where Servicing_Office = @Servicing_Office";
+            cmd4 = new SqlCommand(query2, con);
+            cmd4.Parameters.AddWithValue("@Servicing_Office", q_so);
+            cmd4.ExecuteNonQuery();
+        }
+        private int getNextCustomerID() {
+            SqlConnection con = new SqlConnection(connection_string);
+            using (con)
+            {
+                con.Open();
+                int a = 0;
+                String _query3 = "select id from Main_Queue where Servicing_Office = @sn";
+                SqlCommand _cmd3 = new SqlCommand(_query3, con);
+                _cmd3.Parameters.AddWithValue("@sn", Servicing_Office);
+                object r = _cmd3.ExecuteScalar();
+                if (r != null) a = (int)r;
+                else
+                {
+                    //code to handle the null case here...
+                    a = 0;
+                }
+                con.Close();
+                return a;
+            }
+            
+        }
         private bool checkIfNextCustomerExist(int q_cn)
         {
             SqlConnection con = new SqlConnection(connection_string);
@@ -104,6 +136,7 @@ namespace ServicingTerminalApplication
         }
         private int nextServicingOffice(int _pattern_no, int _transaction_id)
         {
+            _pattern_no++;
             int a = 0;
             int temp_pattern_no = 0;
             int temp_transaction_id = 0;
@@ -118,6 +151,7 @@ namespace ServicingTerminalApplication
                     break;
                 }
             }
+            MessageBox.Show("nextServicingOffice returns = "+a);
             return a;
         }
         private DataTable getTransactionInfo()
@@ -194,12 +228,12 @@ namespace ServicingTerminalApplication
             //declare variables to be used on functions
             SqlConnection con = new SqlConnection(connection_string);
 
-            Console.Write(" \n ** Calling function Set_Information_Queue() ** \n ");
+            Console.Write(" \n ** Calling function SetQueueInformation() ** \n ");
             //This function increments queue and retrives information about the queue
-            Set_Information_Queue(con);
+            SetQueueInformation(con);
 
         }
-        private void Set_Information_Queue(SqlConnection con) {
+        private void SetQueueInformation(SqlConnection con) {
             //Retrieves information on the queue respective to its own Servicing Office
             using (con)
             {
@@ -234,23 +268,39 @@ namespace ServicingTerminalApplication
                     string q_s = rdr["Status"].ToString();
                     tempCounter = (int)rdr["Counter"];
 
-                    if (q_cn < getQueueNumber(con, Servicing_Office))
-                    {
-                        //Increment goes here
-                        Console.Write(" \n incrementing q_cn [Queue_Current_Number] \n ");
-                        q_cn++;
-                        Console.Write(" \n ** Calling Mode_Check with con and tempCounter (current mode counter) ** \n ");
-                        Mode_Check(con, tempCounter);
-
-                        cmd2.Parameters.AddWithValue("@q_cn", q_cn);
-                        cmd2.Parameters.AddWithValue("@q_cntr", modeCounter);
-                        cmd2.Parameters.AddWithValue("@Servicing_Office", Servicing_Office);
-                        cmd2.Parameters.AddWithValue("@q_w", window);
-                        Console.Write("Writing to database...");
-                        cmd2.ExecuteNonQuery();
-                        setCustomerInformation(con, (q_cn-1));
+                    //Looks for the Main_Queue first if there is someone with a Servicing_Office of this instance
+                    int id = 0;
+                    id = getNextCustomerID();
+                    if (id == 0) {
+                        // If next Customer doesn't exists
+                        MessageBox.Show("No more customers on Queue -- from SetQueueInformation");
                     }
-                    else { MessageBox.Show("No customers on queue."); }
+                    else {
+                        // If next Customer exists
+                        if (q_cn < getQueueNumber(con, Servicing_Office))
+                        {
+
+                            // Incrementing the value for the next Queue_Number of the next Customer
+                            Console.Write(" \n incrementing q_cn [Queue_Current_Number] \n ");
+                            //  Program-variable
+                            q_cn++;
+                            //  Write to Database
+                            
+                            Console.Write(" \n ** Calling Mode_Check with con and tempCounter (current mode counter) ** \n ");
+                            Mode_Check(con, tempCounter);
+
+                            cmd2.Parameters.AddWithValue("@q_cn", q_cn);
+                            cmd2.Parameters.AddWithValue("@q_cntr", modeCounter);
+                            cmd2.Parameters.AddWithValue("@Servicing_Office", Servicing_Office);
+                            cmd2.Parameters.AddWithValue("@q_w", window);
+                            Console.Write("Writing to database...");
+                            cmd2.ExecuteNonQuery();
+                            setCustomerInformation(con, (q_cn - 1));
+                        }
+                        else { MessageBox.Show("Customer Number limit reached -- Queue_Info"); }
+                    }
+
+                    
 
                 }
                 else
@@ -300,7 +350,7 @@ namespace ServicingTerminalApplication
                 rdr3 = cmd4.ExecuteReader();
                 if (rdr3.Read())
                 {
-                    MessageBox.Show("HELLO! there is a Servicing_Office #2");
+                    // Retrieves the information of the next customer to be served
                     id = rdr3["Queue_Number"].ToString();
                     type = ((Boolean)rdr3["Type"] == false) ? "Student" : "Guest";
                     s_id = rdr3["Student_No"].ToString();
@@ -310,32 +360,39 @@ namespace ServicingTerminalApplication
                     transaction_type_id = (int)rdr3["Transaction_Type"];
                     foreach (DataRow row in table_Transactions.Rows)
                     {
+                        // Retrieves the Transaction ID of the queue
                         int _id = (int)row["Transaction_Type"];
                         if (_id == transaction_type_id)
                         {
                             transaction_type = (String)row["Transaction_Name"];
                         }
                     }
-                    if (_pattern_current <= _pattern_max)
+                    if (_pattern_current < _pattern_max)
                     {
+                        // Checks if there are still next Servicing Offices after this transaction
+                        int q_nso = nextServicingOffice(_pattern_current, transaction_type_id);
                         _cmd4 = new SqlCommand(_query_insert, con);
                         _cmd4.Parameters.AddWithValue("@q_cn", q_cn);
                         _cmd4.Parameters.AddWithValue("@sn", Servicing_Office);
-                        _cmd4.Parameters.AddWithValue("@q_nso", nextServicingOffice(_pattern_current, transaction_type_id));
+                        _cmd4.Parameters.AddWithValue("@q_nso", q_nso);
+                        incrementQueueNumber(con,q_nso);
                         _cmd4.ExecuteNonQuery();
                     }
                     else
                     {
+                        // If no more Servicing Offices, delete from Main_Queue Table
                         _cmd4 = new SqlCommand(_query_delete, con);
                         _cmd4.Parameters.AddWithValue("@q_cn", q_cn);
                         _cmd4.ExecuteNonQuery();
                     }
                     Console.Write("\n\n using _cmd0 -- q_cn = " + q_cn + " _pattern_current = " + _pattern_current);
+                        // Removes a Queue_Transaction info of the Customer everytime Next() is clicked
                     _cmd0 = new SqlCommand(_query_delete_queue_pattern, con);
                     _cmd0.Parameters.AddWithValue("@q_cn", q_cn);
                     _cmd0.Parameters.AddWithValue("@q_pn", _pattern_current);
                     _cmd0.ExecuteNonQuery();
 
+                        // Updates the information shown on Form3
                     updateForm nuea = new updateForm();
                     nuea.id = id;
                     nuea.type = type;
@@ -353,7 +410,7 @@ namespace ServicingTerminalApplication
                 //fnf.OnFirstNameUpdated(nuea);
                 Console.Write("updating using fnf...");
 
-            }else { MessageBox.Show("Nibba doesn't exist."); }
+            }else { MessageBox.Show("checkIfNextCustomerExist returns FALSE."); }
         }
         private void Transfer_Customer_Logs() { }
         private void Transfer_Customer_Office() { }
