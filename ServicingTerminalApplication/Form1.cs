@@ -13,7 +13,7 @@ namespace ServicingTerminalApplication
         Form2 form2 = new Form2();
         Form3 f3 = (Form3)Application.OpenForms["form3"];
         private String connection_string = System.Configuration.ConfigurationManager.ConnectionStrings["dbString"].ConnectionString;
-        static int Servicing_Office = 2;
+        static int Servicing_Office = 1;
         static int window = 1;
         static int modeCounter = 0;
         private static string id = string.Empty;
@@ -48,10 +48,10 @@ namespace ServicingTerminalApplication
             _pattern_current = 0;
 
         }
-        private void updateQueueNumber(SqlConnection con, int id)
-        {}
+        private void updateQueueNumber(SqlConnection con, int id) { }
         private void incrementQueueNumber(SqlConnection con, int q_so)
         {
+            int a = 0;
             // increment queue number 
             SqlCommand cmd4;
             String query2 = "update Queue_Info set Current_Queue = Current_Queue+1 where Servicing_Office = @Servicing_Office";
@@ -295,7 +295,7 @@ namespace ServicingTerminalApplication
                             cmd2.Parameters.AddWithValue("@q_w", window);
                             Console.Write("Writing to database...");
                             cmd2.ExecuteNonQuery();
-                            setCustomerInformation(con, (q_cn - 1));
+                            setCustomerInformation(con, (q_cn - 1),id);
                         }
                         else { MessageBox.Show("Customer Number limit reached -- Queue_Info"); }
                     }
@@ -329,7 +329,7 @@ namespace ServicingTerminalApplication
             
             return res;
         }
-        private void setCustomerInformation(SqlConnection con, int q_cn) {
+        private void setCustomerInformation(SqlConnection con, int q_cn, int q_id) {
 
             // Called when next button is clicked.
             if (checkIfNextCustomerExist(q_cn))
@@ -338,8 +338,8 @@ namespace ServicingTerminalApplication
 
                 SqlCommand cmd4, _cmd4, _cmd0;
                 String query = "select TOP 1 Queue_Number,Type,Student_No,Full_name,Transaction_Type,Pattern_Current,Pattern_Max from Main_Queue where Queue_Number = @q_cn and Servicing_Office = @sn";
-                String _query_insert = "update Main_Queue set Servicing_Office = @q_nso, Pattern_Current = Pattern_Current + 1 where Queue_Number = @q_cn and Servicing_Office = @sn";
-                String _query_delete = "delete from Main_Queue where Queue_Number = @q_cn and Servicing_Office = @sn";
+                String _query_insert = "update Main_Queue set Queue_Number = @q_cn, Servicing_Office = @q_nso, Pattern_Current = Pattern_Current + 1 where id = @q_id";
+                String _query_delete = "delete from Main_Queue where id = @id";
                 //Console.Write(" \n \n deleting from main queue qn = " + q_cn + " ;; sn = " + Servicing_Office);
                 String _query_delete_queue_pattern = "delete from Queue_Transaction where Main_Queue_ID = @q_cn and Pattern_No = @q_pn";
                 cmd4 = new SqlCommand(query, con);
@@ -358,6 +358,7 @@ namespace ServicingTerminalApplication
                     _pattern_max = (int)rdr3["Pattern_Max"];
                     _pattern_current = (int)rdr3["Pattern_Current"];
                     transaction_type_id = (int)rdr3["Transaction_Type"];
+                    int q_nso = 0;
                     foreach (DataRow row in table_Transactions.Rows)
                     {
                         // Retrieves the Transaction ID of the queue
@@ -370,19 +371,19 @@ namespace ServicingTerminalApplication
                     if (_pattern_current < _pattern_max)
                     {
                         // Checks if there are still next Servicing Offices after this transaction
-                        int q_nso = nextServicingOffice(_pattern_current, transaction_type_id);
+                        q_nso = nextServicingOffice(_pattern_current, transaction_type_id);
                         _cmd4 = new SqlCommand(_query_insert, con);
-                        _cmd4.Parameters.AddWithValue("@q_cn", q_cn);
-                        _cmd4.Parameters.AddWithValue("@sn", Servicing_Office);
+                        _cmd4.Parameters.AddWithValue("@q_id", q_id);
+                        _cmd4.Parameters.AddWithValue("@q_cn", getQueueNumber(con,q_nso));
                         _cmd4.Parameters.AddWithValue("@q_nso", q_nso);
-                        incrementQueueNumber(con,q_nso);
+                        incrementQueueNumber(con, q_nso);
                         _cmd4.ExecuteNonQuery();
                     }
                     else
                     {
                         // If no more Servicing Offices, delete from Main_Queue Table
                         _cmd4 = new SqlCommand(_query_delete, con);
-                        _cmd4.Parameters.AddWithValue("@q_cn", q_cn);
+                        _cmd4.Parameters.AddWithValue("@id", q_id);
                         _cmd4.ExecuteNonQuery();
                     }
                     Console.Write("\n\n using _cmd0 -- q_cn = " + q_cn + " _pattern_current = " + _pattern_current);
