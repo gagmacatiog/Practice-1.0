@@ -1,7 +1,14 @@
-﻿using System;
+﻿using Firebase.Auth;
+using Firebase.Auth.Payloads;
+using Newtonsoft.Json;
+using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.IO;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ServicingTerminalApplication
@@ -29,26 +36,53 @@ namespace ServicingTerminalApplication
         DataTable table_Transactions;
         DataTable table_Transactions_List;
         Form3 fnf = new Form3();
+
+        public _Queue_Info Class_queue { get; private set; }
+
         public Form1()
         {
             InitializeComponent();
-            Rectangle workingArea = Screen.GetWorkingArea(this);
-            this.Location = new Point(workingArea.Right - Size.Width,
-                                      workingArea.Bottom - Size.Height);
-            this.TopMost = true;
-            
-            fnf.FirstNameUpdated += Fnf_FirstNameUpdated;
-            fnf.Show();
-            Console.Write("\n Initializing form... Calling getModes() to set table_Modes \n ");
-            table_Modes = getModes();
-            table_Transactions = getTransactionInfo();
-            table_Transactions_List = getTransactionList();
-            transaction_type_id = 0;
-            _pattern_max = 0;
-            _pattern_current = 0;
+            //Rectangle workingArea = Screen.GetWorkingArea(this);
+            //this.Location = new Point(workingArea.Right - Size.Width,
+            //                          workingArea.Bottom - Size.Height);
+            //this.TopMost = true;
+
+            //fnf.FirstNameUpdated += Fnf_FirstNameUpdated;
+            //fnf.Show();
+            //Console.Write("\n Initializing form... Calling getModes() to set table_Modes \n ");
+            //table_Modes = getModes();
+            //table_Transactions = getTransactionInfo();
+            //table_Transactions_List = getTransactionList();
+            //transaction_type_id = 0;
+            //_pattern_max = 0;
+            //_pattern_current = 0;
+            Test();
 
         }
-        private void updateQueueNumber(SqlConnection con, int id) { }
+        private async void Test()
+        {
+            String b = "";
+            firebase_Connection fcon = new firebase_Connection();
+            _Queue_Info e_queue = new _Queue_Info
+            {
+                ID = 1234,
+                Current_Number = 123456
+
+            };
+            await fcon.InsertMultiple();
+
+        }
+        private void Terminal_Update_QueueInfo(int q_cn, int modeCounter, int _servicing_office, int window)
+        {
+            _Queue_Info a = new _Queue_Info {
+                Current_Number = q_cn,
+                Counter = modeCounter,
+                Window = window
+            };
+            firebase_Connection fcon = new firebase_Connection();
+            fcon.App_Update_QueueInfo(_servicing_office,a);
+
+        }
         private void incrementQueueNumber(SqlConnection con, int q_so)
         {
             int a = 0;
@@ -295,6 +329,9 @@ namespace ServicingTerminalApplication
                             cmd2.Parameters.AddWithValue("@q_w", window);
                             Console.Write("Writing to database...");
                             cmd2.ExecuteNonQuery();
+
+                            // Update Firebase database
+                            Terminal_Update_QueueInfo(q_cn,modeCounter,Servicing_Office,window);
                             setCustomerInformation(con, (q_cn - 1),id);
                         }
                         else { MessageBox.Show("Customer Number limit reached -- Queue_Info"); }
@@ -502,47 +539,6 @@ namespace ServicingTerminalApplication
         private void button1_Click(object sender, EventArgs e)
         {
             Next();
-            //int ServicingOffice = 1;
-            //SqlConnection con = new SqlConnection(connection_string);
-            //using (con)
-            //{
-            //    SqlCommand cmd = new SqlCommand();
-            //    SqlDataReader rdr;
-
-            //    cmd.CommandText = "WalkIn_To_Main";
-            //    cmd.CommandType = CommandType.StoredProcedure;
-            //    cmd.Parameters.AddWithValue("ServicingOffice", ServicingOffice);
-            //    cmd.Connection = con;
-
-            //    con.Open();
-
-            //    rdr = cmd.ExecuteReader();
-            //    // Data is accessible through the DataReader object here.
-            //    while (rdr.Read())
-            //    {
-            //        // get the results of each column
-            //        // string id = (string)rdr["id"];
-            //        id = rdr["id"].ToString();
-            //        type = (string)rdr["Type"];
-            //        s_id = (string)rdr["Student_No"];
-            //        full_name = rdr["Full_name"].ToString();
-            //        transaction_type = (string)rdr["Transaction_Type"];
-
-
-            //    }
-            //    con.Close();
-
-            //}
-            
-            //updateForm nuea = new updateForm();
-            //nuea.id = id;
-            //nuea.type = type;
-            //nuea.s_id = s_id;
-            //nuea.full_name = full_name;
-            //nuea.transaction_type = transaction_type;
-            //fnf.OnFirstNameUpdated(nuea);
-
-
         }
 
         private void button2_Click(object sender, EventArgs e)
