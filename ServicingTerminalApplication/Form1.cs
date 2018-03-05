@@ -42,35 +42,58 @@ namespace ServicingTerminalApplication
         public Form1()
         {
             InitializeComponent();
-            //Rectangle workingArea = Screen.GetWorkingArea(this);
-            //this.Location = new Point(workingArea.Right - Size.Width,
-            //                          workingArea.Bottom - Size.Height);
-            //this.TopMost = true;
+            Rectangle workingArea = Screen.GetWorkingArea(this);
+            this.Location = new Point(workingArea.Right - Size.Width,
+                                      workingArea.Bottom - Size.Height);
+            this.TopMost = true;
 
-            //fnf.FirstNameUpdated += Fnf_FirstNameUpdated;
-            //fnf.Show();
-            //Console.Write("\n Initializing form... Calling getModes() to set table_Modes \n ");
-            //table_Modes = getModes();
-            //table_Transactions = getTransactionInfo();
-            //table_Transactions_List = getTransactionList();
-            //transaction_type_id = 0;
-            //_pattern_max = 0;
-            //_pattern_current = 0;
-            Test();
+            fnf.FirstNameUpdated += Fnf_FirstNameUpdated;
+            fnf.Show();
+            Console.Write("\n Initializing form... Calling getModes() to set table_Modes \n ");
+            table_Modes = getModes();
+            table_Transactions = getTransactionInfo();
+            table_Transactions_List = getTransactionList();
+            transaction_type_id = 0;
+            _pattern_max = 0;
+            _pattern_current = 0;
 
         }
-        private async void Test()
+        //private async Task Test()
+        //{
+        //    String b = "";
+        //    firebase_Connection fcon = new firebase_Connection();
+        //    _Queue_Info e_queue = new _Queue_Info
+        //    {
+        //        ID = 1234,
+        //        Current_Number = 123456
+
+        //    };
+        //    await fcon.InsertMultiple();
+
+        //}
+        private async void Terminal_Delete_MainQueue(int q_id)
         {
-            String b = "";
             firebase_Connection fcon = new firebase_Connection();
-            _Queue_Info e_queue = new _Queue_Info
-            {
-                ID = 1234,
-                Current_Number = 123456
 
+            await fcon.App_Delete_MainQueue(q_id);
+        }
+        private async void Terminal_Delete_QueueTransaction(string ID_Pattern)
+        {
+            firebase_Connection fcon = new firebase_Connection();
+
+            await fcon.App_Delete_QueueTransaction(ID_Pattern);
+        }
+        private void Terminal_Update_MainQueue(int gqn, int q_nso, int res_Pattern_Increment, int q_id)
+        {
+            _Main_Queue mq = new _Main_Queue {
+                Queue_Number = gqn,
+                Servicing_Office = q_nso,
+                Pattern_Current = res_Pattern_Increment
             };
-            await fcon.InsertMultiple();
-
+            firebase_Connection fcon = new firebase_Connection();
+            //Task.Run(() => conn.Update(this.hero)).Wait();
+            //await fcon.App_Update_MainQueue(q_id,mq);
+            Task.Run(() => fcon.App_Update_MainQueue(q_id,mq));
         }
         private void Terminal_Update_QueueInfo(int q_cn, int modeCounter, int _servicing_office, int window)
         {
@@ -332,6 +355,8 @@ namespace ServicingTerminalApplication
 
                             // Update Firebase database
                             Terminal_Update_QueueInfo(q_cn,modeCounter,Servicing_Office,window);
+
+                            // Set customer information on the Local DB
                             setCustomerInformation(con, (q_cn - 1),id);
                         }
                         else { MessageBox.Show("Customer Number limit reached -- Queue_Info"); }
@@ -361,6 +386,7 @@ namespace ServicingTerminalApplication
             //SqlDataReader rdr2;
             //rdr2 = cmd3.ExecuteReader();
             //while (rdr2.Read()) { res = (int)rdr2["Current_Queue"]; }
+            Console.Write("VARIABLES ->" + q_so);
             res = (int)cmd3.ExecuteScalar();
             Console.Write("--RETURNING-> getQueueNumber[" + res + "]");
             
@@ -375,7 +401,7 @@ namespace ServicingTerminalApplication
 
                 SqlCommand cmd4, _cmd4, _cmd0;
                 String query = "select TOP 1 Queue_Number,Type,Student_No,Full_name,Transaction_Type,Pattern_Current,Pattern_Max from Main_Queue where Queue_Number = @q_cn and Servicing_Office = @sn";
-                String _query_insert = "update Main_Queue set Queue_Number = @q_cn, Servicing_Office = @q_nso, Pattern_Current = Pattern_Current + 1 where id = @q_id";
+                String _query_update = "update Main_Queue set Queue_Number = @q_cn, Servicing_Office = @q_nso, Pattern_Current = Pattern_Current + 1 OUTPUT Inserted.Pattern_Current where id = @q_id";
                 String _query_delete = "delete from Main_Queue where id = @id";
                 //Console.Write(" \n \n deleting from main queue qn = " + q_cn + " ;; sn = " + Servicing_Office);
                 String _query_delete_queue_pattern = "delete from Queue_Transaction where Main_Queue_ID = @q_cn and Pattern_No = @q_pn";
@@ -407,14 +433,23 @@ namespace ServicingTerminalApplication
                     }
                     if (_pattern_current < _pattern_max)
                     {
+                        //declare variables first to prevent multiple calls
+                        
+                        int res_Pattern_Increment = 0;
                         // Checks if there are still next Servicing Offices after this transaction
                         q_nso = nextServicingOffice(_pattern_current, transaction_type_id);
-                        _cmd4 = new SqlCommand(_query_insert, con);
+                        int gqn = getQueueNumber(con, q_nso);
+                        _cmd4 = new SqlCommand(_query_update, con);
                         _cmd4.Parameters.AddWithValue("@q_id", q_id);
-                        _cmd4.Parameters.AddWithValue("@q_cn", getQueueNumber(con,q_nso));
+                        _cmd4.Parameters.AddWithValue("@q_cn", gqn);
                         _cmd4.Parameters.AddWithValue("@q_nso", q_nso);
                         incrementQueueNumber(con, q_nso);
-                        _cmd4.ExecuteNonQuery();
+                        res_Pattern_Increment = (int)_cmd4.ExecuteScalar();
+
+                        // Updating to firebase -> Main_Queue
+                        Terminal_Update_MainQueue(gqn,q_nso,res_Pattern_Increment,q_id);
+                        
+
                     }
                     else
                     {
@@ -422,13 +457,20 @@ namespace ServicingTerminalApplication
                         _cmd4 = new SqlCommand(_query_delete, con);
                         _cmd4.Parameters.AddWithValue("@id", q_id);
                         _cmd4.ExecuteNonQuery();
+
+                        // Deleting from firebase -> Main_Queue
+                        Terminal_Delete_MainQueue(q_id);
+
                     }
                     Console.Write("\n\n using _cmd0 -- q_cn = " + q_cn + " _pattern_current = " + _pattern_current);
-                        // Removes a Queue_Transaction info of the Customer everytime Next() is clicked
+                        // Delete a Queue_Transaction info of the Customer everytime Next() is clicked
                     _cmd0 = new SqlCommand(_query_delete_queue_pattern, con);
                     _cmd0.Parameters.AddWithValue("@q_cn", q_cn);
                     _cmd0.Parameters.AddWithValue("@q_pn", _pattern_current);
                     _cmd0.ExecuteNonQuery();
+                    string ID_Pattern = q_cn + "-" + _pattern_current;
+                    // Deleting from firebase -> Queue_Transaction
+                        Terminal_Delete_QueueTransaction(ID_Pattern);
 
                         // Updates the information shown on Form3
                     updateForm nuea = new updateForm();
@@ -450,6 +492,8 @@ namespace ServicingTerminalApplication
 
             }else { MessageBox.Show("checkIfNextCustomerExist returns FALSE."); }
         }
+
+
         private void Transfer_Customer_Logs() { }
         private void Transfer_Customer_Office() { }
         private void Mode_Check(SqlConnection con,int retrieved_counter) {
