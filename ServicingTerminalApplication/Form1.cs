@@ -20,7 +20,7 @@ namespace ServicingTerminalApplication
         Form2 form2 = new Form2();
         Form3 f3 = (Form3)Application.OpenForms["form3"];
         private String connection_string = System.Configuration.ConfigurationManager.ConnectionStrings["dbString"].ConnectionString;
-        static int Servicing_Office = 1;
+        static int Servicing_Office = 2;
         static int window = 1;
         static int modeCounter = 0;
         private static string id = string.Empty;
@@ -28,9 +28,11 @@ namespace ServicingTerminalApplication
         private static string full_name = string.Empty;
         private static string transaction_type = string.Empty;
         private static string type = string.Empty;
+        private static string _customer_queue_number = string.Empty;
         private static int transaction_type_id;
         private static int _pattern_max;
         private static int _pattern_current;
+        private static string w_temp_run = string.Empty;
         //private static int
         DataTable table_Modes;
         DataTable table_Transactions;
@@ -41,6 +43,7 @@ namespace ServicingTerminalApplication
 
         public Form1()
         {
+            
             InitializeComponent();
             Rectangle workingArea = Screen.GetWorkingArea(this);
             this.Location = new Point(workingArea.Right - Size.Width,
@@ -56,7 +59,8 @@ namespace ServicingTerminalApplication
             transaction_type_id = 0;
             _pattern_max = 0;
             _pattern_current = 0;
-
+            w_temp_run += "@ 0Program started. ";
+            w_temp_run += "@ 0All Datatables have been generated.";
         }
         //private async Task Test()
         //{
@@ -111,10 +115,15 @@ namespace ServicingTerminalApplication
             int a = 0;
             // increment queue number 
             SqlCommand cmd4;
-            String query2 = "update Queue_Info set Current_Queue = Current_Queue+1 where Servicing_Office = @Servicing_Office";
+            w_temp_run += "@ incrementQueueNumber has been called.";
+            w_temp_run += "@ tbl.Queue_Info will be updated.";
+            String query2 = "update Queue_Info set Current_Queue = Current_Queue+1, Customer_Queue_Number = @q_cqn where Servicing_Office = @Servicing_Office";
             cmd4 = new SqlCommand(query2, con);
             cmd4.Parameters.AddWithValue("@Servicing_Office", q_so);
+            cmd4.Parameters.AddWithValue("@q_cqn", _customer_queue_number);
             cmd4.ExecuteNonQuery();
+            w_temp_run += "@ New values for tbl.Queue_Info at Servicing Office ["+q_so+"]:";
+            w_temp_run += "@ Check Current_Queue incremented by 1, Customer_Queue_Number changed to "+_customer_queue_number;
         }
         private int getNextCustomerID() {
             SqlConnection con = new SqlConnection(connection_string);
@@ -288,6 +297,7 @@ namespace ServicingTerminalApplication
             Console.Write(" \n ** Calling function SetQueueInformation() ** \n ");
             //This function increments queue and retrives information about the queue
             SetQueueInformation(con);
+            w_temp_run += "@ 0SetQueueInformation has been called from Next()";
 
         }
         private void SetQueueInformation(SqlConnection con) {
@@ -300,7 +310,7 @@ namespace ServicingTerminalApplication
                 SqlCommand cmd3 = con.CreateCommand();
                 cmd.CommandType = CommandType.Text;
                 cmd2.CommandType = CommandType.Text;
-
+                
                 String query = "select * from Queue_Info where Servicing_Office = @Servicing_Office";
                 String query2 = "update Queue_Info set Current_Number = @q_cn, Counter = @q_cntr, Window = @q_w where Servicing_Office = @Servicing_Office";
 
@@ -318,7 +328,7 @@ namespace ServicingTerminalApplication
                 if (rowCount > 0)
                 {
                     // Check if there is people on queue
-
+                    w_temp_run += "@ 1People on Queue_Info have been detected.";
                     // Retrieve queue info and set to variables
                     int q_cn = (int)rdr["Current_Number"];
                     int q_m = (int)rdr["Mode"];
@@ -330,15 +340,17 @@ namespace ServicingTerminalApplication
                     id = getNextCustomerID();
                     if (id == 0) {
                         // If next Customer doesn't exists
+                        w_temp_run += "@ 1getNextCustomerID, the unique id for next customer, is " + id;
                         MessageBox.Show("No more customers on Queue -- from SetQueueInformation");
                     }
                     else {
                         // If next Customer exists
                         if (q_cn < getQueueNumber(con, Servicing_Office))
                         {
-
+                            w_temp_run += "@ 1getNextCustomerID, the unique id for next customer, is " + id;
                             // Incrementing the value for the next Queue_Number of the next Customer
                             Console.Write(" \n incrementing q_cn [Queue_Current_Number] \n ");
+                            w_temp_run += "@ 1Incrementing the Current Number of Queue, running on this program.";
                             //  Program-variable
                             q_cn++;
                             //  Write to Database
@@ -352,7 +364,10 @@ namespace ServicingTerminalApplication
                             cmd2.Parameters.AddWithValue("@q_w", window);
                             Console.Write("Writing to database...");
                             cmd2.ExecuteNonQuery();
-
+                            w_temp_run += "@ 1Written to Queue_Info > ";
+                            w_temp_run += "@ 1Current_Number : "+q_cn;
+                            w_temp_run += "@ 1Counter : "+modeCounter;
+                            w_temp_run += "@ 1Window : "+window;
                             // Update Firebase database
                             Terminal_Update_QueueInfo(q_cn,modeCounter,Servicing_Office,window);
 
@@ -380,6 +395,7 @@ namespace ServicingTerminalApplication
             int res = 0;
 
             SqlCommand cmd3;
+            w_temp_run += "@ 2getQueueNumber has been called.";
             String query = "select Current_Queue from Queue_Info where Servicing_Office = @Servicing_Office";
             cmd3 = new SqlCommand(query, con);
             cmd3.Parameters.AddWithValue("@Servicing_Office", q_so);
@@ -388,6 +404,8 @@ namespace ServicingTerminalApplication
             //while (rdr2.Read()) { res = (int)rdr2["Current_Queue"]; }
             Console.Write("VARIABLES ->" + q_so);
             res = (int)cmd3.ExecuteScalar();
+            w_temp_run += "@ 2Query -> Queue_Info ? Current_Queue where Servicing_Office = "+q_so;
+            w_temp_run += "@ 2getQueueNumber returns Current_Queue : "+res;
             Console.Write("--RETURNING-> getQueueNumber[" + res + "]");
             
             return res;
@@ -398,9 +416,9 @@ namespace ServicingTerminalApplication
             if (checkIfNextCustomerExist(q_cn))
             {
                 // Calls consecutive functions for the next customer to be served.
-
+                w_temp_run += "@ 3setCustomerInformation has been called. No tbl.Queue_Info updates are run here.";
                 SqlCommand cmd4, _cmd4, _cmd0;
-                String query = "select TOP 1 Queue_Number,Type,Student_No,Full_name,Transaction_Type,Pattern_Current,Pattern_Max from Main_Queue where Queue_Number = @q_cn and Servicing_Office = @sn";
+                String query = "select TOP 1 Queue_Number,Type,Student_No,Full_name,Transaction_Type,Pattern_Current,Pattern_Max,Customer_Queue_Number from Main_Queue where Queue_Number = @q_cn and Servicing_Office = @sn";
                 String _query_update = "update Main_Queue set Queue_Number = @q_cn, Servicing_Office = @q_nso, Pattern_Current = Pattern_Current + 1 OUTPUT Inserted.Pattern_Current where id = @q_id";
                 String _query_delete = "delete from Main_Queue where id = @id";
                 //Console.Write(" \n \n deleting from main queue qn = " + q_cn + " ;; sn = " + Servicing_Office);
@@ -421,6 +439,16 @@ namespace ServicingTerminalApplication
                     _pattern_max = (int)rdr3["Pattern_Max"];
                     _pattern_current = (int)rdr3["Pattern_Current"];
                     transaction_type_id = (int)rdr3["Transaction_Type"];
+                    _customer_queue_number = (string)rdr3["Customer_Queue_Number"];
+                    w_temp_run += "@ 3The next customer to be served is : ";
+                    w_temp_run += "@ Queue_Number : "+id;
+                    w_temp_run += "@ Student_No / Name : "+s_id;
+                    w_temp_run += "@ Full_Name : "+full_name;
+                    w_temp_run += "@ Pattern_Max : "+_pattern_max;
+                    w_temp_run += "@ Patter_Current : "+_pattern_current;
+                    w_temp_run += "@ Transaction_Type_ID : "+transaction_type_id;
+                    w_temp_run += "@ Unique Queue Number (Customer) : "+_customer_queue_number;
+
                     int q_nso = 0;
                     foreach (DataRow row in table_Transactions.Rows)
                     {
@@ -429,6 +457,7 @@ namespace ServicingTerminalApplication
                         if (_id == transaction_type_id)
                         {
                             transaction_type = (String)row["Transaction_Name"];
+                            w_temp_run += "@ 3Transaction_Name : "+transaction_type;
                         }
                     }
                     if (_pattern_current < _pattern_max)
@@ -438,6 +467,8 @@ namespace ServicingTerminalApplication
                         int res_Pattern_Increment = 0;
                         // Checks if there are still next Servicing Offices after this transaction
                         q_nso = nextServicingOffice(_pattern_current, transaction_type_id);
+                        w_temp_run += "@ 3Updating Main_Queue ";
+                        w_temp_run += "@ 3where ID = getQueueNumber (another call)";
                         int gqn = getQueueNumber(con, q_nso);
                         _cmd4 = new SqlCommand(_query_update, con);
                         _cmd4.Parameters.AddWithValue("@q_id", q_id);
@@ -445,6 +476,11 @@ namespace ServicingTerminalApplication
                         _cmd4.Parameters.AddWithValue("@q_nso", q_nso);
                         incrementQueueNumber(con, q_nso);
                         res_Pattern_Increment = (int)_cmd4.ExecuteScalar();
+                        w_temp_run += "@ 3back to setCustomerInformation: new values are:";
+                        w_temp_run += "@ 3Queue_Number";
+                        w_temp_run += "@ 3Servicing_Office";
+                        w_temp_run += "@ 3Pattern Current incremented";
+                        w_temp_run += "@ 3where id = "+q_id;
 
                         // Updating to firebase -> Main_Queue
                         Terminal_Update_MainQueue(gqn,q_nso,res_Pattern_Increment,q_id);
@@ -457,7 +493,7 @@ namespace ServicingTerminalApplication
                         _cmd4 = new SqlCommand(_query_delete, con);
                         _cmd4.Parameters.AddWithValue("@id", q_id);
                         _cmd4.ExecuteNonQuery();
-
+                        w_temp_run += "@ 3No more next servicing office. Job is done, deleting";
                         // Deleting from firebase -> Main_Queue
                         Terminal_Delete_MainQueue(q_id);
 
@@ -468,11 +504,18 @@ namespace ServicingTerminalApplication
                     _cmd0.Parameters.AddWithValue("@q_cn", q_cn);
                     _cmd0.Parameters.AddWithValue("@q_pn", _pattern_current);
                     _cmd0.ExecuteNonQuery();
+                    w_temp_run += "@ 3A queue transaction is deleted for this query,";
+                    w_temp_run += "@ 3Main_Queue_ID of "+q_cn;
+                    w_temp_run += "@ 3Pattern Current of "+_pattern_current;
                     string ID_Pattern = q_cn + "-" + _pattern_current;
                     // Deleting from firebase -> Queue_Transaction
                         Terminal_Delete_QueueTransaction(ID_Pattern);
-
-                        // Updates the information shown on Form3
+                    w_temp_run += "@ 3Updating form now, generating this text.";
+                    w_temp_run = w_temp_run.Replace("@", "@" + System.Environment.NewLine);
+                    Console.WriteLine(w_temp_run);
+                    MessageBox.Show(w_temp_run);
+                    w_temp_run = string.Empty;
+                    // Updates the information shown on Form3
                     updateForm nuea = new updateForm();
                     nuea.id = id;
                     nuea.type = type;

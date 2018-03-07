@@ -53,7 +53,7 @@ namespace ServicingTerminalApplication
             var cc = await firebase.Child(node).OrderBy("ID").StartAt(q_id).EndAt((q_id)+1).LimitToFirst(1).OnceAsync<_Main_Queue>();
             foreach (var b in cc) { key = b.Key; }
 
-            Console.WriteLine("Key returned is " + key);
+            Console.WriteLine("App Delete MainQueue key - > " + key);
 
             try { await firebase.Child(node).Child(key).DeleteAsync(); }
             catch (Exception e) { Console.Write("Delete failed ! Error ->" + e); }
@@ -86,9 +86,9 @@ namespace ServicingTerminalApplication
             foreach (var b in cc) { key = b.Key;
                 // Passing variables to the new _Main_Queue updated class
                 mq.ID = b.Object.ID;
-                mq.Mode = b.Object.Mode;
                 mq.Transaction_Type = b.Object.Transaction_Type;
                 mq.Student_No = b.Object.Student_No;
+                mq.Customer_Queue_Number = b.Object.Customer_Queue_Number;
             }
             Console.WriteLine(run+" Query is > " + node+key+mq.ID);
             try { await firebase.Child(node).Child(key).PatchAsync(mq); }
