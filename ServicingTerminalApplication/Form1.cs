@@ -20,9 +20,9 @@ namespace ServicingTerminalApplication
         Form2 form2 = new Form2();
         Form3 f3 = (Form3)Application.OpenForms["form3"];
         private String connection_string = System.Configuration.ConfigurationManager.ConnectionStrings["dbString"].ConnectionString;
-        static int Servicing_Office = 2;
-        static int window = 1;
-        static int modeCounter = 0;
+        static int PROGRAM_Servicing_Office = 2;
+        static int PROGRAM_window = 1;
+        private static int PROGRAM_modeCounter = 0;
         private static string id = string.Empty;
         private static string s_id = string.Empty;
         private static string full_name = string.Empty;
@@ -33,12 +33,23 @@ namespace ServicingTerminalApplication
         private static int _pattern_max;
         private static int _pattern_current;
         private static string w_temp_run = string.Empty;
-        //private static int
+        private static bool DoneServingRealCustomer = false;
         DataTable table_Modes;
         DataTable table_Transactions;
         DataTable table_Transactions_List;
         Form3 fnf = new Form3();
 
+        _Main_Queue Next_Customer = new _Main_Queue();
+        _Main_Queue Previous_Customer = new _Main_Queue();
+        _Main_Queue No_Customer = new _Main_Queue
+        {
+            Queue_Number = 0,
+            Full_Name = "NULL",
+            Servicing_Office = 0,
+            Transaction_Type = 0,
+            Type = "NULL",
+            Customer_Queue_Number = "NULL"
+        };
         public _Queue_Info Class_queue { get; private set; }
 
         public Form1()
@@ -52,7 +63,7 @@ namespace ServicingTerminalApplication
 
             fnf.FirstNameUpdated += Fnf_FirstNameUpdated;
             fnf.Show();
-            Console.Write("\n Initializing form... Calling getModes() to set table_Modes \n ");
+            //Console.Write("\n Initializing form... Calling getModes() to set table_Modes \n ");
             table_Modes = getModes();
             table_Transactions = getTransactionInfo();
             table_Transactions_List = getTransactionList();
@@ -61,6 +72,11 @@ namespace ServicingTerminalApplication
             _pattern_current = 0;
             w_temp_run += "@ 0Program started. ";
             w_temp_run += "@ 0All Datatables have been generated.";
+            Previous_Customer = No_Customer;
+        }
+        private void z(String a)
+        {
+            w_temp_run += a + Environment.NewLine;
         }
         //private async Task Test()
         //{
@@ -133,7 +149,7 @@ namespace ServicingTerminalApplication
                 int a = 0;
                 String _query3 = "select id from Main_Queue where Servicing_Office = @sn";
                 SqlCommand _cmd3 = new SqlCommand(_query3, con);
-                _cmd3.Parameters.AddWithValue("@sn", Servicing_Office);
+                _cmd3.Parameters.AddWithValue("@sn", PROGRAM_Servicing_Office);
                 object r = _cmd3.ExecuteScalar();
                 if (r != null) a = (int)r;
                 else
@@ -155,7 +171,7 @@ namespace ServicingTerminalApplication
                 bool a = false;
                 String _query1 = "select TOP 1 Servicing_Office from Main_Queue where Queue_Number = @qn and Servicing_Office = @sn";
                 SqlCommand _cmd1 = new SqlCommand(_query1, con);
-                _cmd1.Parameters.AddWithValue("@sn", Servicing_Office);
+                _cmd1.Parameters.AddWithValue("@sn", PROGRAM_Servicing_Office);
                 _cmd1.Parameters.AddWithValue("@qn", q_cn);
                 object r = _cmd1.ExecuteScalar();
                 if (r != null) a = true;
@@ -193,16 +209,16 @@ namespace ServicingTerminalApplication
                        (int)t_rdr["Transaction_ID"],
                        (int)t_rdr["Servicing_Office"],
                        (int)t_rdr["Pattern_No"]);
-                    Console.Write(" getTransactions -> Added a row! ");
+                    //Console.Write(" getTransactions -> Added a row! ");
                 }
                 con.Close();
             }
-            Console.Write(" \n returning transactionList... \n ");
+            //Console.Write(" \n returning transactionList... \n ");
             return transactionList;
         }
         private int nextServicingOffice(int _pattern_no, int _transaction_id)
         {
-            _pattern_no++;
+            //_pattern_no++;
             int a = 0;
             int temp_pattern_no = 0;
             int temp_transaction_id = 0;
@@ -210,14 +226,14 @@ namespace ServicingTerminalApplication
             {
                 temp_pattern_no = (int)row["Pattern_No"];
                 temp_transaction_id = (int)row["Transaction_ID"];
-                Console.Write(" \n retrieving the next servicing office ");
+                //Console.Write(" \n retrieving the next servicing office ");
                 if (_transaction_id == temp_transaction_id && temp_pattern_no == _pattern_no)
                 {
                     a = (int)row["Servicing_Office"];
                     break;
                 }
             }
-            MessageBox.Show("nextServicingOffice returns = "+a);
+            MessageBox.Show("nextServicingOffice returns = "+a+"at Pattern#"+temp_pattern_no);
             return a;
         }
         private DataTable getTransactionInfo()
@@ -244,11 +260,11 @@ namespace ServicingTerminalApplication
                     transactionType.Rows.Add(
                         (int)m_rdr["id"],
                         (string)m_rdr["Transaction_Name"]);
-                    Console.Write(" getTransactions -> Added a row! ");
+                    //Console.Write(" getTransactions -> Added a row! ");
                 }
                 con.Close();
             }
-            Console.Write(" \n returning transactionType... \n ");
+            //Console.Write(" \n returning transactionType... \n ");
             return transactionType;
         }
 
@@ -281,152 +297,27 @@ namespace ServicingTerminalApplication
                         (int)m_rdr["Min"],
                         (int)m_rdr["Max"],
                         (int)m_rdr["Count_WalkIn"]);
-                    Console.Write(" getModes -> Added a row! ");
+                   // Console.Write(" getModes -> Added a row! ");
                 }
                 con.Close();
             }
-            Console.Write(" \n returning modeList... \n ");
+           // Console.Write(" \n returning modeList... \n ");
             return modeList;
         }
-        private void Next() {
-            //Called when next button is clicked
-
-            //declare variables to be used on functions
-            SqlConnection con = new SqlConnection(connection_string);
-
-            Console.Write(" \n ** Calling function SetQueueInformation() ** \n ");
-            //This function increments queue and retrives information about the queue
-            SetQueueInformation(con);
-            w_temp_run += "@ 0SetQueueInformation has been called from Next()";
-
-        }
-        private void SetQueueInformation(SqlConnection con) {
-            //Retrieves information on the queue respective to its own Servicing Office
-            using (con)
-            {
-                con.Open();
-                SqlCommand cmd = con.CreateCommand();
-                SqlCommand cmd2 = con.CreateCommand();
-                SqlCommand cmd3 = con.CreateCommand();
-                cmd.CommandType = CommandType.Text;
-                cmd2.CommandType = CommandType.Text;
-                
-                String query = "select * from Queue_Info where Servicing_Office = @Servicing_Office";
-                String query2 = "update Queue_Info set Current_Number = @q_cn, Counter = @q_cntr, Window = @q_w where Servicing_Office = @Servicing_Office";
-
-                cmd = new SqlCommand(query, con);
-                cmd.Parameters.AddWithValue("@Servicing_Office", Servicing_Office);
-                cmd2 = new SqlCommand(query2, con);
-                SqlDataReader rdr;
-
-                //Selecting Customer
-
-                rdr = cmd.ExecuteReader();
-                int rowCount = 0, tempCounter = 0;
-                while (rdr.Read())
-                { rowCount++; { if (rowCount > 0) { break; } } }
-                if (rowCount > 0)
-                {
-                    // Check if there is people on queue
-                    w_temp_run += "@ 1People on Queue_Info have been detected.";
-                    // Retrieve queue info and set to variables
-                    int q_cn = (int)rdr["Current_Number"];
-                    int q_m = (int)rdr["Mode"];
-                    string q_s = rdr["Status"].ToString();
-                    tempCounter = (int)rdr["Counter"];
-
-                    //Looks for the Main_Queue first if there is someone with a Servicing_Office of this instance
-                    int id = 0;
-                    id = getNextCustomerID();
-                    if (id == 0) {
-                        // If next Customer doesn't exists
-                        w_temp_run += "@ 1getNextCustomerID, the unique id for next customer, is " + id;
-                        MessageBox.Show("No more customers on Queue -- from SetQueueInformation");
-                    }
-                    else {
-                        // If next Customer exists
-                        if (q_cn < getQueueNumber(con, Servicing_Office))
-                        {
-                            w_temp_run += "@ 1getNextCustomerID, the unique id for next customer, is " + id;
-                            // Incrementing the value for the next Queue_Number of the next Customer
-                            Console.Write(" \n incrementing q_cn [Queue_Current_Number] \n ");
-                            w_temp_run += "@ 1Incrementing the Current Number of Queue, running on this program.";
-                            //  Program-variable
-                            q_cn++;
-                            //  Write to Database
-                            
-                            Console.Write(" \n ** Calling Mode_Check with con and tempCounter (current mode counter) ** \n ");
-                            Mode_Check(con, tempCounter);
-
-                            cmd2.Parameters.AddWithValue("@q_cn", q_cn);
-                            cmd2.Parameters.AddWithValue("@q_cntr", modeCounter);
-                            cmd2.Parameters.AddWithValue("@Servicing_Office", Servicing_Office);
-                            cmd2.Parameters.AddWithValue("@q_w", window);
-                            Console.Write("Writing to database...");
-                            cmd2.ExecuteNonQuery();
-                            w_temp_run += "@ 1Written to Queue_Info > ";
-                            w_temp_run += "@ 1Current_Number : "+q_cn;
-                            w_temp_run += "@ 1Counter : "+modeCounter;
-                            w_temp_run += "@ 1Window : "+window;
-                            // Update Firebase database
-                            Terminal_Update_QueueInfo(q_cn,modeCounter,Servicing_Office,window);
-
-                            // Set customer information on the Local DB
-                            setCustomerInformation(con, (q_cn - 1),id);
-                        }
-                        else { MessageBox.Show("Customer Number limit reached -- Queue_Info"); }
-                    }
-
-                    
-
-                }
-                else
-                {
-                    MessageBox.Show("No queueing data found. Please start an instance of a serving kiosk first.");
-                }
-
-            }
-            con.Close();
-
-        }
-        private int getQueueNumber(SqlConnection con, int q_so)
-        {
-            // retrieves queue number
-            int res = 0;
-
-            SqlCommand cmd3;
-            w_temp_run += "@ 2getQueueNumber has been called.";
-            String query = "select Current_Queue from Queue_Info where Servicing_Office = @Servicing_Office";
-            cmd3 = new SqlCommand(query, con);
-            cmd3.Parameters.AddWithValue("@Servicing_Office", q_so);
-            //SqlDataReader rdr2;
-            //rdr2 = cmd3.ExecuteReader();
-            //while (rdr2.Read()) { res = (int)rdr2["Current_Queue"]; }
-            Console.Write("VARIABLES ->" + q_so);
-            res = (int)cmd3.ExecuteScalar();
-            w_temp_run += "@ 2Query -> Queue_Info ? Current_Queue where Servicing_Office = "+q_so;
-            w_temp_run += "@ 2getQueueNumber returns Current_Queue : "+res;
-            Console.Write("--RETURNING-> getQueueNumber[" + res + "]");
-            
-            return res;
-        }
+        
+        
         private void setCustomerInformation(SqlConnection con, int q_cn, int q_id) {
 
             // Called when next button is clicked.
             if (checkIfNextCustomerExist(q_cn))
             {
                 // Calls consecutive functions for the next customer to be served.
-                w_temp_run += "@ 3setCustomerInformation has been called. No tbl.Queue_Info updates are run here.";
-                SqlCommand cmd4, _cmd4, _cmd0;
+                SqlCommand cmd4;
                 String query = "select TOP 1 Queue_Number,Type,Student_No,Full_name,Transaction_Type,Pattern_Current,Pattern_Max,Customer_Queue_Number from Main_Queue where Queue_Number = @q_cn and Servicing_Office = @sn";
-                String _query_update = "update Main_Queue set Queue_Number = @q_cn, Servicing_Office = @q_nso, Pattern_Current = Pattern_Current + 1 OUTPUT Inserted.Pattern_Current where id = @q_id";
-                String _query_delete = "delete from Main_Queue where id = @id";
-                //Console.Write(" \n \n deleting from main queue qn = " + q_cn + " ;; sn = " + Servicing_Office);
-                String _query_delete_queue_pattern = "delete from Queue_Transaction where Main_Queue_ID = @q_cn and Pattern_No = @q_pn";
                 cmd4 = new SqlCommand(query, con);
 
                 cmd4.Parameters.AddWithValue("@q_cn", q_cn);
-                cmd4.Parameters.AddWithValue("@sn", Servicing_Office);
+                cmd4.Parameters.AddWithValue("@sn", PROGRAM_Servicing_Office);
                 SqlDataReader rdr3;
                 rdr3 = cmd4.ExecuteReader();
                 if (rdr3.Read())
@@ -440,82 +331,6 @@ namespace ServicingTerminalApplication
                     _pattern_current = (int)rdr3["Pattern_Current"];
                     transaction_type_id = (int)rdr3["Transaction_Type"];
                     _customer_queue_number = (string)rdr3["Customer_Queue_Number"];
-                    w_temp_run += "@ 3The next customer to be served is : ";
-                    w_temp_run += "@ Queue_Number : "+id;
-                    w_temp_run += "@ Student_No / Name : "+s_id;
-                    w_temp_run += "@ Full_Name : "+full_name;
-                    w_temp_run += "@ Pattern_Max : "+_pattern_max;
-                    w_temp_run += "@ Patter_Current : "+_pattern_current;
-                    w_temp_run += "@ Transaction_Type_ID : "+transaction_type_id;
-                    w_temp_run += "@ Unique Queue Number (Customer) : "+_customer_queue_number;
-
-                    int q_nso = 0;
-                    foreach (DataRow row in table_Transactions.Rows)
-                    {
-                        // Retrieves the Transaction ID of the queue
-                        int _id = (int)row["Transaction_Type"];
-                        if (_id == transaction_type_id)
-                        {
-                            transaction_type = (String)row["Transaction_Name"];
-                            w_temp_run += "@ 3Transaction_Name : "+transaction_type;
-                        }
-                    }
-                    if (_pattern_current < _pattern_max)
-                    {
-                        //declare variables first to prevent multiple calls
-                        
-                        int res_Pattern_Increment = 0;
-                        // Checks if there are still next Servicing Offices after this transaction
-                        q_nso = nextServicingOffice(_pattern_current, transaction_type_id);
-                        w_temp_run += "@ 3Updating Main_Queue ";
-                        w_temp_run += "@ 3where ID = getQueueNumber (another call)";
-                        int gqn = getQueueNumber(con, q_nso);
-                        _cmd4 = new SqlCommand(_query_update, con);
-                        _cmd4.Parameters.AddWithValue("@q_id", q_id);
-                        _cmd4.Parameters.AddWithValue("@q_cn", gqn);
-                        _cmd4.Parameters.AddWithValue("@q_nso", q_nso);
-                        incrementQueueNumber(con, q_nso);
-                        res_Pattern_Increment = (int)_cmd4.ExecuteScalar();
-                        w_temp_run += "@ 3back to setCustomerInformation: new values are:";
-                        w_temp_run += "@ 3Queue_Number";
-                        w_temp_run += "@ 3Servicing_Office";
-                        w_temp_run += "@ 3Pattern Current incremented";
-                        w_temp_run += "@ 3where id = "+q_id;
-
-                        // Updating to firebase -> Main_Queue
-                        Terminal_Update_MainQueue(gqn,q_nso,res_Pattern_Increment,q_id);
-                        
-
-                    }
-                    else
-                    {
-                        // If no more Servicing Offices, delete from Main_Queue Table
-                        _cmd4 = new SqlCommand(_query_delete, con);
-                        _cmd4.Parameters.AddWithValue("@id", q_id);
-                        _cmd4.ExecuteNonQuery();
-                        w_temp_run += "@ 3No more next servicing office. Job is done, deleting";
-                        // Deleting from firebase -> Main_Queue
-                        Terminal_Delete_MainQueue(q_id);
-
-                    }
-                    Console.Write("\n\n using _cmd0 -- q_cn = " + q_cn + " _pattern_current = " + _pattern_current);
-                        // Delete a Queue_Transaction info of the Customer everytime Next() is clicked
-                    _cmd0 = new SqlCommand(_query_delete_queue_pattern, con);
-                    _cmd0.Parameters.AddWithValue("@q_cn", q_cn);
-                    _cmd0.Parameters.AddWithValue("@q_pn", _pattern_current);
-                    _cmd0.ExecuteNonQuery();
-                    w_temp_run += "@ 3A queue transaction is deleted for this query,";
-                    w_temp_run += "@ 3Main_Queue_ID of "+q_cn;
-                    w_temp_run += "@ 3Pattern Current of "+_pattern_current;
-                    string ID_Pattern = q_cn + "-" + _pattern_current;
-                    // Deleting from firebase -> Queue_Transaction
-                        Terminal_Delete_QueueTransaction(ID_Pattern);
-                    w_temp_run += "@ 3Updating form now, generating this text.";
-                    w_temp_run = w_temp_run.Replace("@", "@" + System.Environment.NewLine);
-                    Console.WriteLine(w_temp_run);
-                    MessageBox.Show(w_temp_run);
-                    w_temp_run = string.Empty;
-                    // Updates the information shown on Form3
                     updateForm nuea = new updateForm();
                     nuea.id = id;
                     nuea.type = type;
@@ -531,20 +346,61 @@ namespace ServicingTerminalApplication
                 //nuea.full_name = "wew";
                 //nuea.transaction_type = "wew";
                 //fnf.OnFirstNameUpdated(nuea);
-                Console.Write("updating using fnf...");
+                // Console.Write("updating using fnf...");
 
             }else { MessageBox.Show("checkIfNextCustomerExist returns FALSE."); }
         }
+        private int getCurrentQueueCounter(int What_Servicing_Office, SqlConnection con)
+        {
+            int x = 0;
+            SqlCommand internal_Command1;
+            string QUERY_retrieve_QueueInfo_Counter = "select TOP 1 Counter from Queue_Info where Servicing_Office = @param_so";
+            internal_Command1 = new SqlCommand(QUERY_retrieve_QueueInfo_Counter, con);
+            internal_Command1.Parameters.AddWithValue("@param_so", What_Servicing_Office);
+            x = (int)internal_Command1.ExecuteScalar();
+            return x;
+        }
+        private int geQueueCurrentNumber(int What_Servicing_Office, SqlConnection con)
+        {
+            int x = 0;
+            SqlCommand internal_Command1;
+            string QUERY_retrieve_QueueInfo_QueueNumber = "select TOP 1 Current_Number from Queue_Info where Servicing_Office = @param_so";
+            internal_Command1 = new SqlCommand(QUERY_retrieve_QueueInfo_QueueNumber, con);
+            internal_Command1.Parameters.AddWithValue("@param_so", What_Servicing_Office);
+            x = (int)internal_Command1.ExecuteScalar();
+            return x;
 
+        }
+        private int getQueueCurrentQueue(int What_Servicing_Office, SqlConnection con)
+        {
+            int x = 0;
+            SqlCommand internal_Command1;
+            string QUERY_retrieve_QueueInfo_CurrentQueue = "select TOP 1 Current_Queue from Queue_Info where Servicing_Office = @param_so";
+            internal_Command1 = new SqlCommand(QUERY_retrieve_QueueInfo_CurrentQueue, con);
+            internal_Command1.Parameters.AddWithValue("@param_so", What_Servicing_Office);
+            x = (int)internal_Command1.ExecuteScalar();
+            return x;
 
-        private void Transfer_Customer_Logs() { }
-        private void Transfer_Customer_Office() { }
+        }
+        private int getCurrentQueueAmount(int What_Servicing_Office, SqlConnection con)
+        {
+            // Counts how many customers are on the queue of this Servicing_Office
+            int x = 0;
+            SqlCommand internal_Command1;
+            string QUERY_retrieve_MainQueue_amount = "select COUNT(id) from Main_Queue where Servicing_Office = @param_so";
+            internal_Command1 = new SqlCommand(QUERY_retrieve_MainQueue_amount, con);
+            internal_Command1.Parameters.AddWithValue("@param_so", What_Servicing_Office);
+            x = (int)internal_Command1.ExecuteScalar();
+            return x;
+
+        }
+        
         private void Mode_Check(SqlConnection con,int retrieved_counter) {
-            int min = 0, max = 0, current_queue_number = 0, count_walkin = 0;
-            string mode_name = "xd";
+            int min = 0, max = 0, current_queue_amount = 0, count_walkin = 0;
+            string mode_name = "PROGRAM_MODE_NOT_FOUND_ON_DB";
             int mode_number = 0;
 
-            current_queue_number = return_on_queue(con);
+            current_queue_amount = getCurrentQueueAmount(PROGRAM_Servicing_Office,con);
 
             foreach (DataRow row in table_Modes.Rows)
             {
@@ -555,22 +411,22 @@ namespace ServicingTerminalApplication
                 min = (int)row["Min"];
                 max = (int)row["Max"];
                 count_walkin = (int)row["Count_WalkIn"];
-                Console.Write(" [[" + current_queue_number + "]] >= " + min + " && <= " + max);
-                Console.Write("wew"+mode_name);
-                if (current_queue_number >= min && current_queue_number <= max) {
+                //Console.Write(" [[" + current_queue_amount + "]] >= " + min + " && <= " + max);
+                //Console.Write("wew"+mode_name);
+                if (current_queue_amount >= min && current_queue_amount <= max) {
                     break;
                 }
             }
             if (retrieved_counter < count_walkin)
             {
                 // increment, continue accepting walk-ins
-                Console.Write(" \n ** Mode_Check() -> Incrementing modeCounter ** \n ");
-                modeCounter++;
+                //Console.Write(" \n ** Mode_Check() -> Incrementing modeCounter ** \n ");
+                PROGRAM_modeCounter++;
             }
             else
             {
-                Console.Write(" \n * Mode_Check() -> Resetting modeCounter ** \n ");
-                modeCounter = 0;
+                //Console.Write(" \n * Mode_Check() -> Resetting modeCounter ** \n ");
+                PROGRAM_modeCounter = 0;
                 // reset the counter, add a code (not here) to pick a mobile user
             }
             //return x;
@@ -584,7 +440,7 @@ namespace ServicingTerminalApplication
             String query4 = "select count(*) as a from Main_Queue where Servicing_Office = @sn";
             SqlCommand cmd3 = new SqlCommand(query4, con);
             SqlDataReader rdr2;
-            cmd3.Parameters.AddWithValue("@sn", Servicing_Office);
+            cmd3.Parameters.AddWithValue("@sn", PROGRAM_Servicing_Office);
             rdr2 = cmd3.ExecuteReader();
             while (rdr2.Read()) { a = (int)rdr2["a"]; }
             // execute return_total_queue
@@ -631,6 +487,197 @@ namespace ServicingTerminalApplication
         private void button2_Click(object sender, EventArgs e)
         {
             
+        }
+        private void Next()
+        {
+            SqlConnection con = new SqlConnection(connection_string);
+            using (con)
+            {
+                con.Open();
+                // Called when next button is clicked
+                // declare variables to be used
+                String QUERY_next_customer_mq = "select TOP 1 Pattern_Current, id, Queue_Number, Full_Name, Servicing_Office, Transaction_Type, Type, Customer_Queue_Number from Main_Queue where Servicing_Office = @param_so and Queue_Status = @param_qs order by Queue_Number asc";
+                String QUERY_next_customer_tq = "select TOP 1 Pattern_Current, id, Queue_Number, Full_Name, Servicing_Office, Transaction_Type, Type, Customer_Queue_Number from Main_Queue where Servicing_Office = @param_so and Queue_Status = @param_qs order by Queue_Number asc";
+                String QUERY_mq_next_customer_update_on_success = "update Main_Queue set Queue_Status = @param_qs where id = @param_uniqueid";
+                String QUERY_tq_next_customer_update_on_success = "update Transfer_Queue set Queue_Status = @param_qs where Main_Queue_ID = @param_uniqueid";
+                SqlCommand Command1,Command2,CommandQuickUpdate;
+                SqlDataReader Reader1,Reader2;
+                
+                bool _READ_COUNTER = false;
+
+                Command1 = new SqlCommand(QUERY_next_customer_mq, con);
+                Command1.Parameters.AddWithValue("@param_so",PROGRAM_Servicing_Office);
+                Command1.Parameters.AddWithValue("@param_qs", "Waiting");
+                Reader1 = Command1.ExecuteReader();
+
+                while (Reader1.Read())
+                {
+                    _READ_COUNTER = true;
+                    z("Customer found on main_queue");
+                    Next_Customer = new _Main_Queue
+                    {
+                        Queue_Number = (int)Reader1["Queue_Number"],
+                        Full_Name = (string)Reader1["Full_Name"],
+                        Servicing_Office = (int)Reader1["Servicing_Office"],
+                        Transaction_Type = (int)Reader1["Transaction_Type"],
+                        Type = ((Boolean)Reader1["Type"] == false) ? "Student" : "Guest",
+                        Customer_Queue_Number = (string)Reader1["Customer_Queue_Number"],
+                        ID = (int)Reader1["id"],
+                        Pattern_Current = (int)Reader1["Pattern_Current"]
+                    };
+                    CommandQuickUpdate = new SqlCommand(QUERY_mq_next_customer_update_on_success, con);
+                    CommandQuickUpdate.Parameters.AddWithValue("@param_qs", "Serving");
+                    CommandQuickUpdate.Parameters.AddWithValue("@param_uniqueid", (int)Reader1["id"]);
+                    CommandQuickUpdate.ExecuteNonQuery();
+                    z("Setting the customer as \"Currently Serving\" finished.");
+
+                }
+                if (!_READ_COUNTER)
+                {
+                    Command2 = new SqlCommand(QUERY_next_customer_tq, con);
+                    Command2.Parameters.AddWithValue("@param_so", PROGRAM_Servicing_Office);
+                    Command2.Parameters.AddWithValue("@param_qs", "Waiting");
+                    Reader2 = Command2.ExecuteReader();
+
+                    while (Reader2.Read())
+                    {
+                        z("read found on transfer queue");
+                        _READ_COUNTER = true;
+                        Next_Customer = new _Main_Queue
+                        {
+                            Queue_Number = (int)Reader2["Queue_Number"],
+                            Full_Name = (string)Reader2["Full_Name"],
+                            Servicing_Office = (int)Reader2["Servicing_Office"],
+                            Transaction_Type = (int)Reader2["Transaction_Type"],
+                            Type = ((Boolean)Reader2["Type"] == false) ? "Student" : "Guest",
+                            Customer_Queue_Number = (string)Reader2["Customer_Queue_Number"],
+                            ID = (int)Reader2["Main_Queue_ID"],
+                            Pattern_Current = (int)Reader2["Pattern_Current"]
+                        };
+                        CommandQuickUpdate = new SqlCommand(QUERY_tq_next_customer_update_on_success, con);
+                        CommandQuickUpdate.Parameters.AddWithValue("@param_qs", "Serving");
+                        CommandQuickUpdate.Parameters.AddWithValue("@param_uniqueid", (int)Reader2["id"]);
+                        CommandQuickUpdate.ExecuteNonQuery();
+                    }
+                    if (_READ_COUNTER) MessageBox.Show("Customer found on Transfer Table.");
+                }
+                if (!_READ_COUNTER) {
+                    //Check first if the Servicing App is holding a real customer to move him to the next one or not.
+                    MoveCustomerToNextOrDelete(con);
+                    Previous_Customer = No_Customer;
+                    MessageBox.Show("Empty Customers.");
+                }
+                else
+                {
+                    // Show the information of the customer.
+                    updateForm nuea = new updateForm();
+                    nuea.id = Next_Customer.Queue_Number.ToString();
+                    nuea.type = Next_Customer.Type;
+                    nuea.s_id = Next_Customer.Servicing_Office.ToString();
+                    nuea.full_name = Next_Customer.Full_Name;
+                    nuea.transaction_type = Next_Customer.Transaction_Type.ToString();
+                    fnf.OnFirstNameUpdated(nuea);
+
+                    // Running calculations for counter
+                    int internal_Current_Counter = getCurrentQueueCounter(PROGRAM_Servicing_Office, con);
+                    Mode_Check(con, internal_Current_Counter);
+
+                    MoveCustomerToNextOrDelete(con);
+
+                    Previous_Customer = Next_Customer;
+
+
+                    //}
+                    //Update Queue_Info everytime next is clicked
+                    SqlCommand Command4;
+                    String QUERY_update_QueueInfo = "update Queue_Info set Current_Number = Current_Number+1, Counter = @param_counter, Window = @param_window, Customer_Queue_Number = @param_cqn where Servicing_Office = @param_so";
+                    Command4 = new SqlCommand(QUERY_update_QueueInfo, con);
+
+                    Command4.Parameters.AddWithValue("@param_counter", PROGRAM_modeCounter);
+                    Command4.Parameters.AddWithValue("@param_window", PROGRAM_window);
+                    Command4.Parameters.AddWithValue("@param_so", PROGRAM_Servicing_Office);
+                    Command4.Parameters.AddWithValue("@param_cqn", Next_Customer.Customer_Queue_Number);
+                    Command4.ExecuteNonQuery();
+                    z("Updating Queue_Info whe next is clicked finished!");
+
+                    Console.WriteLine(w_temp_run);
+                    w_temp_run = string.Empty;
+                }
+                
+
+
+
+            }
+            con.Close();
+
+
+        }
+        private void MoveCustomerToNextOrDelete(SqlConnection con)
+        {
+            Previous_Customer.Pattern_Current++;
+            //z("Previous Customer Pattern Current is " + Previous_Customer.Pattern_Current);
+            int _NEXT_Servicing_Office = nextServicingOffice(Previous_Customer.Pattern_Current, Previous_Customer.Transaction_Type);
+            //z("Checking Pattern Current again " + Previous_Customer.Pattern_Current);
+            z("START of MoveCustomerToNextOrDelete function.");
+            //If the Previous Customer has no more "next" Servicing Office, remove him from the Main Queue
+            if (_NEXT_Servicing_Office == 0)
+            {
+                if (Previous_Customer.ID > 0)
+                {
+                    //Remove the customer from the Table:Main_Queue
+                    SqlCommand deleteCommand;
+                    String QUERY_delete_MainQueue_onNext = "delete from Main_Queue where id = @param_unique_id";
+                    deleteCommand = new SqlCommand(QUERY_delete_MainQueue_onNext, con);
+                    deleteCommand.Parameters.AddWithValue("@param_unique_id", Previous_Customer.ID);
+                    z("Deleting from Table: Main_Queue with id of " + Previous_Customer.ID);
+                    MessageBox.Show("Customer id#" + Previous_Customer.ID + " deleted!");
+                    deleteCommand.ExecuteNonQuery();
+                    z("Real customer is deleted.");
+                }
+                else { MessageBox.Show("Previous customer is a null."); z("NULL Customer is ignored. Nothing is deleted"); }
+            }
+            else
+            {
+                //Transfer the Customer to the next Servicing Office
+                //Change the values of the served Customer at Main_Queue
+                SqlCommand Command6;
+                //Next line -> Update Table: Main Queue of Previous Customer
+                //Sending #customer to the next Servicing Office
+                String QUERY_update_MainQueue_onNext = "update Main_Queue set Queue_Number = @param_qn, Servicing_Office = @param_so, Pattern_Current = Pattern_Current + 1, Queue_Status = @param_qs where id = @param_unique_id";
+                Command6 = new SqlCommand(QUERY_update_MainQueue_onNext, con);
+                //Get the Queue_Number from the tip of Table:Queue_Info -> Current_Queue
+                int TEMP_getCustomerQueueNumberOnNext = getQueueCurrentQueue(_NEXT_Servicing_Office, con);
+                //Declare parameters
+                Command6.Parameters.AddWithValue("@param_qn", TEMP_getCustomerQueueNumberOnNext);
+                Command6.Parameters.AddWithValue("@param_so", _NEXT_Servicing_Office);
+                Command6.Parameters.AddWithValue("@param_unique_id", Previous_Customer.ID);
+                Command6.Parameters.AddWithValue("@param_qs", "Waiting");
+                z("The update Main_Queue for moving a customer run with the following values:");
+                z("Queue Number : " + TEMP_getCustomerQueueNumberOnNext);
+                z("Servicing Office : " + _NEXT_Servicing_Office);
+                z("Unique id of : " + Previous_Customer.ID);
+                z("Pattern Number is :" + Previous_Customer.Pattern_Current);
+                //Execute Commands
+                Command6.ExecuteNonQuery();
+                //Increment the Previous_Customer 
+
+                z("Main_Queue and Queue_Info updated since next SO is found.");
+                z("NEXT Servicing Office is ->" + _NEXT_Servicing_Office);
+                z("This Query finished : update Main_Queue set Queue_Number = " + TEMP_getCustomerQueueNumberOnNext + ", Servicing_Office = " + _NEXT_Servicing_Office + " where id = " + Previous_Customer.ID);
+
+                SqlCommand Command5;
+                String QUERY_update_QueueInfo_addThisOnNext = "update Queue_Info set Current_Queue = Current_Queue + 1 where Servicing_Office = @param_so";
+
+                Command5 = new SqlCommand(QUERY_update_QueueInfo_addThisOnNext, con);
+                Command5.Parameters.AddWithValue("@param_so", _NEXT_Servicing_Office);
+
+                Command5.ExecuteNonQuery();
+
+                z("This Query finished : update Queue_Info increment Current_Queue where Servicing_Office = " + _NEXT_Servicing_Office + " where id = " + Previous_Customer.ID);
+
+
+            }
+            z("END of MoveCustomerToNextOrDelete function.");
         }
     }
 }
