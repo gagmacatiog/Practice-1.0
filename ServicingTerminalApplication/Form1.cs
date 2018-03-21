@@ -78,19 +78,6 @@ namespace ServicingTerminalApplication
         {
             w_temp_run += a + Environment.NewLine;
         }
-        //private async Task Test()
-        //{
-        //    String b = "";
-        //    firebase_Connection fcon = new firebase_Connection();
-        //    _Queue_Info e_queue = new _Queue_Info
-        //    {
-        //        ID = 1234,
-        //        Current_Number = 123456
-
-        //    };
-        //    await fcon.InsertMultiple();
-
-        //}
         private async void Terminal_Delete_MainQueue(int q_id)
         {
             firebase_Connection fcon = new firebase_Connection();
@@ -305,51 +292,6 @@ namespace ServicingTerminalApplication
             return modeList;
         }
         
-        
-        private void setCustomerInformation(SqlConnection con, int q_cn, int q_id) {
-
-            // Called when next button is clicked.
-            if (checkIfNextCustomerExist(q_cn))
-            {
-                // Calls consecutive functions for the next customer to be served.
-                SqlCommand cmd4;
-                String query = "select TOP 1 Queue_Number,Type,Student_No,Full_name,Transaction_Type,Pattern_Current,Pattern_Max,Customer_Queue_Number from Main_Queue where Queue_Number = @q_cn and Servicing_Office = @sn";
-                cmd4 = new SqlCommand(query, con);
-
-                cmd4.Parameters.AddWithValue("@q_cn", q_cn);
-                cmd4.Parameters.AddWithValue("@sn", PROGRAM_Servicing_Office);
-                SqlDataReader rdr3;
-                rdr3 = cmd4.ExecuteReader();
-                if (rdr3.Read())
-                {
-                    // Retrieves the information of the next customer to be served
-                    id = rdr3["Queue_Number"].ToString();
-                    type = ((Boolean)rdr3["Type"] == false) ? "Student" : "Guest";
-                    s_id = rdr3["Student_No"].ToString();
-                    full_name = rdr3["Full_name"].ToString();
-                    _pattern_max = (int)rdr3["Pattern_Max"];
-                    _pattern_current = (int)rdr3["Pattern_Current"];
-                    transaction_type_id = (int)rdr3["Transaction_Type"];
-                    _customer_queue_number = (string)rdr3["Customer_Queue_Number"];
-                    updateForm nuea = new updateForm();
-                    nuea.id = id;
-                    nuea.type = type;
-                    nuea.s_id = s_id;
-                    nuea.full_name = full_name;
-                    nuea.transaction_type = transaction_type;
-                    fnf.OnFirstNameUpdated(nuea);
-                }
-
-                //nuea.id = "wew";
-                //nuea.type = "wew";
-                //nuea.s_id = "wew";
-                //nuea.full_name = "wew";
-                //nuea.transaction_type = "wew";
-                //fnf.OnFirstNameUpdated(nuea);
-                // Console.Write("updating using fnf...");
-
-            }else { MessageBox.Show("checkIfNextCustomerExist returns FALSE."); }
-        }
         private int getCurrentQueueCounter(int What_Servicing_Office, SqlConnection con)
         {
             int x = 0;
@@ -432,19 +374,6 @@ namespace ServicingTerminalApplication
             //return x;
 
             
-        }
-        private int return_on_queue(SqlConnection con)
-        {
-            // counts how many customers on queue at a [Servicing Office]
-            int a = 0;
-            String query4 = "select count(*) as a from Main_Queue where Servicing_Office = @sn";
-            SqlCommand cmd3 = new SqlCommand(query4, con);
-            SqlDataReader rdr2;
-            cmd3.Parameters.AddWithValue("@sn", PROGRAM_Servicing_Office);
-            rdr2 = cmd3.ExecuteReader();
-            while (rdr2.Read()) { a = (int)rdr2["a"]; }
-            // execute return_total_queue
-            return a;
         }
         private void Fnf_FirstNameUpdated(object sender, updateForm e)
         {

@@ -111,21 +111,6 @@ namespace ServicingTerminalApplication
             //>await firebase.Child(node).Child(q_info.Key).DeleteAsync();
 
         }
-    //    public async void SelectKey(string node,int where, _Queue_Info q_info) {
-
-    //Console.WriteLine("Select Key Running...");
-
-    //        string key = "";
-    //        var cc = await firebase.Child(node).OrderBy("ID").StartAt(where).EndAt((where+1)).LimitToFirst(1).OnceAsync<_Queue_Info>();
-    //        foreach (var b in cc) {key = b.Key;}
-
-    //Console.WriteLine("Key returned is " + key);
-
-    //        await firebase.Child(node).Child(key).PatchAsync<_Queue_Info>(q_info);
-
-    //Console.WriteLine("query done");
-
-    //    }
         public async void App_Update_QueueInfo(int where, _Queue_Info q_info)
         {
             string node = "Queue_Info/";
