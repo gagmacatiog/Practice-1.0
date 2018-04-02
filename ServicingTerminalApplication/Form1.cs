@@ -17,7 +17,6 @@ namespace ServicingTerminalApplication
     public partial class Form1 : Form
     {
         bool clickCheck = false;
-        Form2 form2 = new Form2();
         Form3 f3 = (Form3)Application.OpenForms["form3"];
         private String connection_string = System.Configuration.ConfigurationManager.ConnectionStrings["dbString"].ConnectionString;
         static int PROGRAM_Servicing_Office = 2;
@@ -392,20 +391,18 @@ namespace ServicingTerminalApplication
         {
 
         }
-                  
-        private void pictureBox1_Click_1(object sender, EventArgs e)
+        protected override void WndProc(ref Message m)
         {
-            if (clickCheck == true)
+            switch (m.Msg)
             {
-                form2.Close();
-                clickCheck = false;
-            }
-            else {
-                form2 = new Form2();
-                form2.Show();
-                clickCheck = true;
+                case 0x84:
+                    base.WndProc(ref m);
+                    if ((int)m.Result == 0x1)
+                        m.Result = (IntPtr)0x2;
+                    return;
             }
 
+            base.WndProc(ref m);
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -417,6 +414,44 @@ namespace ServicingTerminalApplication
         {
             
         }
+
+        private void onMouseClick(object sender, EventArgs e)
+        {
+            if (((PictureBox)sender) == pictureBox1)
+            {
+                Form1.ActiveForm.Dock = DockStyle.Right;
+                Form1.ActiveForm.Width = 67;
+            }
+            else
+            {
+                Form1.ActiveForm.Width = 135;
+            }
+        }
+
+        private void onHover(object sender, EventArgs e)
+        {
+            if(((PictureBox)sender) == pictureBox1)
+            {
+                ((PictureBox)sender).Image = ServicingTerminalApplication.Properties.Resources.nextBtn_pressed;
+            }
+            else
+            {
+                ((PictureBox)sender).Image = ServicingTerminalApplication.Properties.Resources.deleteBtn_pressed;
+            }
+        }
+
+        private void onMouseLeave(object sender, EventArgs e)
+        {
+            if (((PictureBox)sender) == pictureBox1)
+            {
+                ((PictureBox)sender).Image = ServicingTerminalApplication.Properties.Resources.nextBtn;
+            }
+            else
+            {
+                ((PictureBox)sender).Image = ServicingTerminalApplication.Properties.Resources.deleteBtn;
+            }
+        }
+
         private void Next()
         {
             SqlConnection con = new SqlConnection(connection_string);
@@ -607,6 +642,11 @@ namespace ServicingTerminalApplication
 
             }
             z("END of MoveCustomerToNextOrDelete function.");
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            new settingsForm().Show();
         }
     }
 }
