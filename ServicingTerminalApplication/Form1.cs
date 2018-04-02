@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Net;
@@ -20,9 +21,10 @@ namespace ServicingTerminalApplication
         Form2 form2 = new Form2();
         Form3 f3 = (Form3)Application.OpenForms["form3"];
         private String connection_string = System.Configuration.ConfigurationManager.ConnectionStrings["dbString"].ConnectionString;
-        static int PROGRAM_Servicing_Office = 2;
-        static int PROGRAM_window = 1;
+        static int PROGRAM_Servicing_Office = 1;
+        static int PROGRAM_window = 2;
         private static int PROGRAM_modeCounter = 0;
+        private static string PROGRAM_Servicing_Office_Name = string.Empty;
         private static string id = string.Empty;
         private static string s_id = string.Empty;
         private static string full_name = string.Empty;
@@ -37,7 +39,10 @@ namespace ServicingTerminalApplication
         DataTable table_Modes;
         DataTable table_Transactions;
         DataTable table_Transactions_List;
+        DataTable table_Servicing_Office;
         Form3 fnf = new Form3();
+
+        Stopwatch _SERVING_TIME = new Stopwatch();
 
         _Main_Queue Next_Customer = new _Main_Queue();
         _Main_Queue Previous_Customer = new _Main_Queue();
@@ -67,12 +72,59 @@ namespace ServicingTerminalApplication
             table_Modes = getModes();
             table_Transactions = getTransactionInfo();
             table_Transactions_List = getTransactionList();
+            table_Servicing_Office = getServicingOfficeList();
             transaction_type_id = 0;
             _pattern_max = 0;
             _pattern_current = 0;
             w_temp_run += "@ 0Program started. ";
             w_temp_run += "@ 0All Datatables have been generated.";
             Previous_Customer = No_Customer;
+            setThisServicingOfficeName();
+            AddThisServicingTerminal();
+        }
+        private void setThisServicingOfficeName()
+        {
+            foreach (DataRow row in table_Servicing_Office.Rows)
+            {
+                int temp_id = (int)row["ID"];
+                if (temp_id == PROGRAM_Servicing_Office)
+                {
+                    PROGRAM_Servicing_Office_Name = (string)row["Name"];
+                    break;
+                }
+            }
+        }
+        private void AddThisServicingTerminal()
+        {
+            SqlConnection con = new SqlConnection(connection_string);
+            try { con.Open(); }
+            catch (SqlException e) { MessageBox.Show("Local Connection problem. This app will now close.");
+                Environment.Exit(0);
+            }
+            //Check if same window and servicing office exists
+            string QUERY_CheckIfWindowExists = "select TOP 1 * from Servicing_Terminal where Servicing_Office = @param_so and Window = @param_window ";
+            SqlCommand check_svc_tmnl = new SqlCommand(QUERY_CheckIfWindowExists, con);
+
+            check_svc_tmnl.Parameters.AddWithValue("@param_so",PROGRAM_Servicing_Office);
+            check_svc_tmnl.Parameters.AddWithValue("@param_window", PROGRAM_window);
+            
+            object r = check_svc_tmnl.ExecuteScalar();
+            if (r == null)
+            {
+                string QUERY_AddServicingTerminal = "insert into Servicing_Terminal (Name, Customer_Queue_Number, Servicing_Office, Window) values" +
+                    "(@param0,@param1,@param2,@param3)";
+                SqlCommand add_svc_tmnl = new SqlCommand(QUERY_AddServicingTerminal, con);
+                
+                add_svc_tmnl.Parameters.AddWithValue("@param0", PROGRAM_Servicing_Office_Name);
+                add_svc_tmnl.Parameters.AddWithValue("@param1", " ");
+                add_svc_tmnl.Parameters.AddWithValue("@param2", PROGRAM_Servicing_Office);
+                add_svc_tmnl.Parameters.AddWithValue("@param3", PROGRAM_window);
+                add_svc_tmnl.ExecuteNonQuery();
+                //MessageBox.Show("no rows returned, adding new servicing terminal!");
+            }
+           // else MessageBox.Show("already exist...");
+            
+            con.Close();
         }
         private void z(String a)
         {
@@ -171,6 +223,34 @@ namespace ServicingTerminalApplication
                 return a;
 
             }
+        }
+        private DataTable getServicingOfficeList()
+        {
+            DataTable ServicingOfficeList = new DataTable();
+            ServicingOfficeList.Columns.Add("Name", typeof(string));
+            ServicingOfficeList.Columns.Add("ID", typeof(int));
+
+            SqlConnection con = new SqlConnection(connection_string);
+            using (con)
+            {
+                con.Open();
+                SqlCommand t_cmd = con.CreateCommand();
+                SqlDataReader t_rdr;
+
+                String t_q = "select * from Servicing_Office";
+                t_cmd = new SqlCommand(t_q, con);
+
+                t_rdr = t_cmd.ExecuteReader();
+                while (t_rdr.Read())
+                {
+                    ServicingOfficeList.Rows.Add(
+                       (string)t_rdr["Name"],
+                       (int)t_rdr["ID"]);
+                }
+                con.Close();
+            }
+            //Console.Write(" \n returning transactionList... \n ");
+            return ServicingOfficeList;
         }
         private DataTable getTransactionList()
         {
@@ -490,6 +570,74 @@ namespace ServicingTerminalApplication
                     }
                     if (_READ_COUNTER) MessageBox.Show("Customer found on Transfer Table.");
                 }
+                
+
+                // Check if timer run a little bit last time = there was a customer
+                if (_SERVING_TIME.Elapsed.Milliseconds > 0)
+                {
+                    // Save this to DB
+                    int _serving_Seconds = _SERVING_TIME.Elapsed.Seconds;
+                    int _serving_Minutes = _SERVING_TIME.Elapsed.Minutes;
+                    int _serving_Hours = _SERVING_TIME.Elapsed.Hours;
+                    int _serving_TotalSeconds = (int)_SERVING_TIME.Elapsed.TotalSeconds;
+
+                    // Check first if 5 entries where written for average
+                    string QUERY_Count_ServingTime = "select count(id) from Serving_Time where Servicing_Office = @param1";
+                    SqlCommand CMD_Count_ServingTime = new SqlCommand(QUERY_Count_ServingTime, con);
+                    CMD_Count_ServingTime.Parameters.AddWithValue("@param1", PROGRAM_Servicing_Office);
+
+                    if ((int)CMD_Count_ServingTime.ExecuteScalar() > 4)
+                    {
+                        int _serving_time_average = 1;
+                        // Delete oldest entry
+                        string QUERY_Delete_Oldest_ServingTime = "DELETE FROM Serving_Time WHERE id IN " +
+                            "(SELECT TOP 1 id FROM Serving_Time order by id asc)";
+                        SqlCommand CMD_Delete_Oldest_ServingTime = new SqlCommand(QUERY_Delete_Oldest_ServingTime, con);
+                        CMD_Delete_Oldest_ServingTime.ExecuteNonQuery();
+
+                        z("-->Deleting oldest row on ast");
+
+                        // Average all entries
+                        string QUERY_Average_ServingTime = "select AVG(Duration_Seconds) from Serving_Time where " +
+                            "Servicing_Office = @param1";
+                        SqlCommand CMD_Average_ServingTime = new SqlCommand(QUERY_Average_ServingTime, con);
+                        CMD_Average_ServingTime.Parameters.AddWithValue("@param1", PROGRAM_Servicing_Office);
+
+                        _serving_time_average = (int)CMD_Average_ServingTime.ExecuteScalar();
+
+                        z("-->Getting average serving time");
+
+                        // Write to Table: Queue_Info
+                        string QUERY_Update_Avg_Serving_Time = "update Queue_Info set Avg_Serving_Time = @param1 where " +
+                            "Servicing_Office = @param2 ";
+                        SqlCommand CMD_Update_QueueInfo_AST = new SqlCommand(QUERY_Update_Avg_Serving_Time, con);
+                        CMD_Update_QueueInfo_AST.Parameters.AddWithValue("@param1", _serving_time_average);
+                        CMD_Update_QueueInfo_AST.Parameters.AddWithValue("@param2", PROGRAM_Servicing_Office);
+
+                        CMD_Update_QueueInfo_AST.ExecuteNonQuery();
+
+                        z("-->Updating AST on Queue_Info");
+
+                    }
+                    string QUERY_Insert_ServingTime = "insert into Serving_Time (Servicing_Office, Duration_Seconds) values" +
+                        " (@param1, @param2) ";
+                    SqlCommand CMD_Insert_ServingTime = new SqlCommand(QUERY_Insert_ServingTime, con);
+
+                    CMD_Insert_ServingTime.Parameters.AddWithValue("@param1", PROGRAM_Servicing_Office);
+                    CMD_Insert_ServingTime.Parameters.AddWithValue("@param2", _serving_TotalSeconds);
+
+                    CMD_Insert_ServingTime.ExecuteNonQuery();
+                    z("A Serving time is just inserted.");
+                    // Stop time before starting another
+                    _SERVING_TIME.Stop();
+
+                    // Reset
+                    _SERVING_TIME.Reset();
+                }
+                else
+                {
+
+                }
                 if (!_READ_COUNTER) {
                     //Check first if the Servicing App is holding a real customer to move him to the next one or not.
                     MoveCustomerToNextOrDelete(con);
@@ -498,6 +646,8 @@ namespace ServicingTerminalApplication
                 }
                 else
                 {
+                    // Customer found.
+
                     // Show the information of the customer.
                     updateForm nuea = new updateForm();
                     nuea.id = Next_Customer.Queue_Number.ToString();
@@ -506,6 +656,10 @@ namespace ServicingTerminalApplication
                     nuea.full_name = Next_Customer.Full_Name;
                     nuea.transaction_type = Next_Customer.Transaction_Type.ToString();
                     fnf.OnFirstNameUpdated(nuea);
+
+                    // Start time serving this customer
+                    _SERVING_TIME.Start();
+                    z("--> Serving Time is now running.");
 
                     // Running calculations for counter
                     int internal_Current_Counter = getCurrentQueueCounter(PROGRAM_Servicing_Office, con);
@@ -526,8 +680,20 @@ namespace ServicingTerminalApplication
                     Command4.Parameters.AddWithValue("@param_window", PROGRAM_window);
                     Command4.Parameters.AddWithValue("@param_so", PROGRAM_Servicing_Office);
                     Command4.Parameters.AddWithValue("@param_cqn", Next_Customer.Customer_Queue_Number);
+
                     Command4.ExecuteNonQuery();
-                    z("Updating Queue_Info whe next is clicked finished!");
+
+                    SqlCommand Command_Update_svc_tmnl;
+                    String QUERY_update_svc_tmnl = "update Servicing_Terminal set Customer_Queue_Number = @param_cqn where Servicing_Office = @param_so and Window = @param_window";
+                    Command_Update_svc_tmnl = new SqlCommand(QUERY_update_svc_tmnl, con);
+
+                    Command_Update_svc_tmnl.Parameters.AddWithValue("@param_cqn", Next_Customer.Customer_Queue_Number);
+                    Command_Update_svc_tmnl.Parameters.AddWithValue("@param_so", PROGRAM_Servicing_Office);
+                    Command_Update_svc_tmnl.Parameters.AddWithValue("@param_window", PROGRAM_window);
+
+                    Command_Update_svc_tmnl.ExecuteNonQuery();
+
+                    z("Updating Queue_Info when next is clicked finished!");
 
                     Console.WriteLine(w_temp_run);
                     w_temp_run = string.Empty;
