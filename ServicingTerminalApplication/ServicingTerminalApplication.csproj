@@ -171,6 +171,36 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="addServicingOffice.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="addServicingOffice.Designer.cs">
+      <DependentUpon>addServicingOffice.cs</DependentUpon>
+    </Compile>
+    <Compile Include="createAccount.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="createAccount.Designer.cs">
+      <DependentUpon>createAccount.cs</DependentUpon>
+    </Compile>
+    <Compile Include="addTransactionType.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="addTransactionType.Designer.cs">
+      <DependentUpon>addTransactionType.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Login.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Login.Designer.cs">
+      <DependentUpon>Login.cs</DependentUpon>
+    </Compile>
+    <Compile Include="settingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="settingsForm.Designer.cs">
+      <DependentUpon>settingsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="_Queue_Transaction.cs" />
     <Compile Include="_Main_Queue.cs" />
     <Compile Include="firebase_Connection.cs" />
@@ -179,12 +209,6 @@
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Form2.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Form2.Designer.cs">
-      <DependentUpon>Form2.cs</DependentUpon>
     </Compile>
     <Compile Include="Form3.cs">
       <SubType>Form</SubType>
@@ -195,14 +219,23 @@
     <Compile Include="_Queue_Info.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="addServicingOffice.resx">
+      <DependentUpon>addServicingOffice.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="addTransactionType.resx">
+      <DependentUpon>addTransactionType.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="createAccount.resx">
+      <DependentUpon>createAccount.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form2.resx">
-      <DependentUpon>Form2.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Form3.resx">
       <DependentUpon>Form3.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Login.resx">
+      <DependentUpon>Login.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -214,6 +247,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="settingsForm.resx">
+      <DependentUpon>settingsForm.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -239,6 +275,29 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\gobackBTN.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\backBtn.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\registerBG.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\createAccout-final.png" />
+    <Content Include="Resources\createAccout-final1.png" />
+    <None Include="Resources\editBtn_pressed.png" />
+    <None Include="Resources\editBtn.png" />
+    <None Include="Resources\outBtn_pressed.png" />
+    <None Include="Resources\outBtn.png" />
+    <None Include="Resources\helpBtn_pressed.png" />
+    <None Include="Resources\helpBtn.png" />
+    <None Include="Resources\nextBtn_pressed.png" />
+    <None Include="Resources\nextBtn.png" />
+    <None Include="Resources\deleteBtn_pressed.png" />
+    <None Include="Resources\deleteBtn.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
