@@ -70,7 +70,10 @@ namespace ServicingTerminalApplication
             }
         }
 
+        private void label10_Click(object sender, EventArgs e)
+        {
 
+        }
     }
     public class updateForm : EventArgs
     {

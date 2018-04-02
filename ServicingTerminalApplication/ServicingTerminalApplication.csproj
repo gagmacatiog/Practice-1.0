@@ -189,6 +189,12 @@
     <Compile Include="addTransactionType.Designer.cs">
       <DependentUpon>addTransactionType.cs</DependentUpon>
     </Compile>
+    <Compile Include="currentCustomer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="currentCustomer.Designer.cs">
+      <DependentUpon>currentCustomer.cs</DependentUpon>
+    </Compile>
     <Compile Include="Login.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -227,6 +233,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="createAccount.resx">
       <DependentUpon>createAccount.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="currentCustomer.resx">
+      <DependentUpon>currentCustomer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
