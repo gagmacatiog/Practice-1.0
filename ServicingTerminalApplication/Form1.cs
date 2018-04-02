@@ -485,26 +485,18 @@ namespace ServicingTerminalApplication
             base.WndProc(ref m);
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            Next();
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            
-        }
+      
 
         private void onMouseClick(object sender, EventArgs e)
         {
             if (((PictureBox)sender) == pictureBox1)
             {
-                Form1.ActiveForm.Dock = DockStyle.Right;
-                Form1.ActiveForm.Width = 67;
+                // If next button is clicked
+                Next();
             }
             else
             {
-                Form1.ActiveForm.Width = 135;
+                // If delete button is clicked
             }
         }
 
