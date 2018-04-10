@@ -12,6 +12,10 @@ namespace ServicingTerminalApplication
 {
     public partial class settingsForm : Form
     {
+        Form1 mainForm = (Form1)Application.OpenForms["Form1"];
+        currentCustomer customerForm = (currentCustomer)Application.OpenForms["currentCustomer"];
+        addServicingOffice form_so = (addServicingOffice)Application.OpenForms["addServicingOffice"];
+        addTransactionType form_tt = (addTransactionType)Application.OpenForms["addTransactionType"];
         public settingsForm()
         {
             InitializeComponent();
@@ -26,12 +30,24 @@ namespace ServicingTerminalApplication
         {
             if (((PictureBox)sender) == pictureBox1)
             {
-                this.Hide();
-                new Login().Show();
-            }
-            else
-            {
-
+                var confirmResult = MessageBox.Show("Are you sure to log out?",
+                                     "Confirm Logout",
+                                     MessageBoxButtons.YesNo);
+                if (confirmResult == DialogResult.Yes)
+                {
+                    // If 'Yes', do something here.
+                    new Login().Show();
+                    this.Hide();
+                    if (mainForm != null)
+                        mainForm.Close();
+                    if (customerForm != null)
+                        customerForm.Close();
+                }
+                else
+                {
+                    // If 'No', do something here.
+                }
+                
             }
         }
 
@@ -89,6 +105,16 @@ namespace ServicingTerminalApplication
         {
             // Save changes
 
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            form_so.Show();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            form_tt.Show();
         }
     }
 }

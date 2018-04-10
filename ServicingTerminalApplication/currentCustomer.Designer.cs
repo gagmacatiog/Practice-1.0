@@ -42,7 +42,7 @@
             this.panel1.BackColor = System.Drawing.SystemColors.Highlight;
             this.panel1.Controls.Add(this.textCQN);
             this.panel1.Location = new System.Drawing.Point(16, 15);
-            this.panel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.panel1.Margin = new System.Windows.Forms.Padding(4);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(257, 167);
             this.panel1.TabIndex = 0;
@@ -56,62 +56,62 @@
             this.textCQN.Name = "textCQN";
             this.textCQN.Size = new System.Drawing.Size(223, 132);
             this.textCQN.TabIndex = 5;
-            this.textCQN.Text = "R-COG8";
+            this.textCQN.Text = "-";
             this.textCQN.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // textID
             // 
             this.textID.Cursor = System.Windows.Forms.Cursors.Default;
             this.textID.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textID.Location = new System.Drawing.Point(283, 16);
-            this.textID.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textID.Location = new System.Drawing.Point(281, 16);
+            this.textID.Margin = new System.Windows.Forms.Padding(4);
             this.textID.Name = "textID";
             this.textID.ReadOnly = true;
             this.textID.ShortcutsEnabled = false;
             this.textID.Size = new System.Drawing.Size(377, 29);
             this.textID.TabIndex = 1;
             this.textID.TabStop = false;
-            this.textID.Text = "ID # 2013-99665";
+            this.textID.Text = "ID # ";
             // 
             // textName
             // 
             this.textName.Cursor = System.Windows.Forms.Cursors.Default;
             this.textName.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textName.Location = new System.Drawing.Point(281, 53);
-            this.textName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textName.Margin = new System.Windows.Forms.Padding(4);
             this.textName.Name = "textName";
             this.textName.ReadOnly = true;
             this.textName.Size = new System.Drawing.Size(377, 29);
             this.textName.TabIndex = 2;
             this.textName.TabStop = false;
-            this.textName.Text = "Cipriano Kyle John A. Soriben III";
+            this.textName.Text = "Name";
             // 
             // textTransaction
             // 
             this.textTransaction.Cursor = System.Windows.Forms.Cursors.Default;
             this.textTransaction.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textTransaction.Location = new System.Drawing.Point(283, 90);
-            this.textTransaction.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textTransaction.Location = new System.Drawing.Point(281, 90);
+            this.textTransaction.Margin = new System.Windows.Forms.Padding(4);
             this.textTransaction.Multiline = true;
             this.textTransaction.Name = "textTransaction";
             this.textTransaction.ReadOnly = true;
             this.textTransaction.Size = new System.Drawing.Size(377, 54);
             this.textTransaction.TabIndex = 3;
             this.textTransaction.TabStop = false;
-            this.textTransaction.Text = "[Registrar] Transcript of Records";
+            this.textTransaction.Text = "-----";
             // 
             // textType
             // 
             this.textType.Cursor = System.Windows.Forms.Cursors.Default;
             this.textType.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textType.Location = new System.Drawing.Point(281, 153);
-            this.textType.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textType.Margin = new System.Windows.Forms.Padding(4);
             this.textType.Name = "textType";
             this.textType.ReadOnly = true;
             this.textType.Size = new System.Drawing.Size(377, 29);
             this.textType.TabIndex = 4;
             this.textType.TabStop = false;
-            this.textType.Text = "Student";
+            this.textType.Text = "-----";
             // 
             // currentCustomer
             // 
@@ -125,10 +125,10 @@
             this.Controls.Add(this.textID);
             this.Controls.Add(this.panel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "currentCustomer";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "currentCustomer";
+            this.Text = "Customer Information";
             this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();

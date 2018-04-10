@@ -79,13 +79,34 @@ namespace ServicingTerminalApplication
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if(checkFields().Equals(true)) {
-
-                registrationProcess();
-
-            }else
+            
+            if (!checkFields())
             {
-                MessageBox.Show("A fields is left empty!", "Fill all fields", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("A field is left empty!", "Fill all fields.", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
+            else if (!OkFieldLength())
+            {
+                MessageBox.Show("Field/s length error!", "Check the length of some fields.", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
+            else
+            {
+                var confirmResult = MessageBox.Show("Are you sure to register this account?",
+                                     "Confirm Registration",
+                                     MessageBoxButtons.YesNo);
+                if (confirmResult == DialogResult.Yes)
+                {
+                    // If 'Yes', do something here.
+                    registrationProcess();
+                    MessageBox.Show("Registration complete!","Success!");
+                }
+                else
+                {
+                    // If 'No', do something here.
+                    resetFields();
+                    this.Hide();
+                    new Login().Show();
+                }
+                
             }
         }
 
@@ -94,7 +115,21 @@ namespace ServicingTerminalApplication
             this.Hide();
             new Login().Show();
         }
-
+        private Boolean OkFieldLength()
+        {
+            if (textBox1.TextLength < 100  && textBox1.TextLength > 10 
+                && textBox2.TextLength < 100 && textBox2.TextLength > 10 
+                && textBox3.TextLength < 50 && textBox3.TextLength > 5
+                && textBox4.TextLength < 50 && textBox4.TextLength > 8)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+            
+        }
 
         private Boolean checkFields()
         {
@@ -121,11 +156,12 @@ namespace ServicingTerminalApplication
         {
             SqlConnection con = new SqlConnection(connection_string);
             con.Open();
+            string Password = Cryptography.Encrypt(textBox4.Text.ToString());
             SqlCommand cmd = new SqlCommand("insert into users (FullName, EmailAddress, Username, Password, Status) values (@FullName,@EmailAddress,@Username, @Password, @Status)", con);
             cmd.Parameters.AddWithValue("@FullName", textBox1.Text);
             cmd.Parameters.AddWithValue("@EmailAddress", textBox2.Text);
             cmd.Parameters.AddWithValue("@Username", textBox3.Text);
-            cmd.Parameters.AddWithValue("@Password", textBox4.Text);
+            cmd.Parameters.AddWithValue("@Password", Password);
             cmd.Parameters.AddWithValue("@Status", 1);
             cmd.ExecuteNonQuery();
             con.Close();

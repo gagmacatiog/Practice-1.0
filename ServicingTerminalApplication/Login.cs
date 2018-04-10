@@ -103,26 +103,44 @@ namespace ServicingTerminalApplication
 
         public void loginProcess()
         {
+            string Password = "";
+            bool IsExist = false;
             SqlConnection con = new SqlConnection(connection_string);
             con.Open();
-            SqlCommand cmd = new SqlCommand("SELECT * FROM users WHERE Username = @Username AND Password = @Password", con);
+            SqlCommand cmd = new SqlCommand("SELECT * FROM users WHERE Username = @Username", con);
             cmd.Parameters.AddWithValue("@Username", textBox1.Text);
-            cmd.Parameters.AddWithValue("@Password", textBox2.Text);
 
             SqlDataReader reader;
 
             reader = cmd.ExecuteReader();
             if (reader.Read())
             {
-                MessageBox.Show("Welcome "+(string)reader["FullName"]);
-                this.Hide();
-                new addTransactionType().Show();
-            }
-            else
-            {
-                MessageBox.Show("Invalid username or password");
+                IsExist = true;
+                Password = (string)reader["Password"];
             }
             con.Close();
+            if (IsExist)  //if record exis in db , it will return true, otherwise it will return false  
+            {
+                if (Cryptography.Decrypt(Password).Equals(textBox2.Text))
+                {
+                    MessageBox.Show("Login Success", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    this.Hide();
+                    new Form1().Show();
+                }
+                else
+                {
+                    MessageBox.Show("Please enter the valid credentials.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    textBox2.Clear();
+                }
+
+            }
+            else  //showing the error message if user credential is wrong  
+            {
+                MessageBox.Show("Please enter the valid credentials.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                textBox2.Clear();
+            }
+
+            
         }
         
 
@@ -131,7 +149,6 @@ namespace ServicingTerminalApplication
             if (e.KeyCode == Keys.Enter)
             {
                 e.Handled = false;
-                e.Handled = true;
                 textBox_leave(((TextBox)sender), new EventArgs());
                 button1.Focus();
                 button1_Click(this, new EventArgs());

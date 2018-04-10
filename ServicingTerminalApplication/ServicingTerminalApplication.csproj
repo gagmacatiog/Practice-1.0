@@ -189,6 +189,7 @@
     <Compile Include="addTransactionType.Designer.cs">
       <DependentUpon>addTransactionType.cs</DependentUpon>
     </Compile>
+    <Compile Include="Cryptography.cs" />
     <Compile Include="currentCustomer.cs">
       <SubType>Form</SubType>
     </Compile>
