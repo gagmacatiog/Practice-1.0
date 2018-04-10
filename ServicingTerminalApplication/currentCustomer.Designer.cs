@@ -29,96 +29,103 @@
         private void InitializeComponent()
         {
             this.panel1 = new System.Windows.Forms.Panel();
-            this.label5 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.textBox3 = new System.Windows.Forms.TextBox();
-            this.textBox4 = new System.Windows.Forms.TextBox();
+            this.textCQN = new System.Windows.Forms.Label();
+            this.textID = new System.Windows.Forms.TextBox();
+            this.textName = new System.Windows.Forms.TextBox();
+            this.textTransaction = new System.Windows.Forms.TextBox();
+            this.textType = new System.Windows.Forms.TextBox();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.SystemColors.Highlight;
-            this.panel1.Controls.Add(this.label5);
-            this.panel1.Location = new System.Drawing.Point(12, 12);
+            this.panel1.Controls.Add(this.textCQN);
+            this.panel1.Location = new System.Drawing.Point(16, 15);
+            this.panel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(193, 136);
+            this.panel1.Size = new System.Drawing.Size(257, 167);
             this.panel1.TabIndex = 0;
             // 
-            // label5
+            // textCQN
             // 
-            this.label5.Font = new System.Drawing.Font("Bernard MT Condensed", 35.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label5.Location = new System.Drawing.Point(13, 16);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(167, 107);
-            this.label5.TabIndex = 5;
-            this.label5.Text = "R-COG8";
-            this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.textCQN.Font = new System.Drawing.Font("Bernard MT Condensed", 35.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textCQN.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.textCQN.Location = new System.Drawing.Point(17, 20);
+            this.textCQN.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.textCQN.Name = "textCQN";
+            this.textCQN.Size = new System.Drawing.Size(223, 132);
+            this.textCQN.TabIndex = 5;
+            this.textCQN.Text = "R-COG8";
+            this.textCQN.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // textBox1
+            // textID
             // 
-            this.textBox1.Cursor = System.Windows.Forms.Cursors.Default;
-            this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox1.Location = new System.Drawing.Point(212, 13);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.ReadOnly = true;
-            this.textBox1.ShortcutsEnabled = false;
-            this.textBox1.Size = new System.Drawing.Size(284, 24);
-            this.textBox1.TabIndex = 1;
-            this.textBox1.TabStop = false;
-            this.textBox1.Text = "ID # 2013-99665";
+            this.textID.Cursor = System.Windows.Forms.Cursors.Default;
+            this.textID.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textID.Location = new System.Drawing.Point(283, 16);
+            this.textID.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textID.Name = "textID";
+            this.textID.ReadOnly = true;
+            this.textID.ShortcutsEnabled = false;
+            this.textID.Size = new System.Drawing.Size(377, 29);
+            this.textID.TabIndex = 1;
+            this.textID.TabStop = false;
+            this.textID.Text = "ID # 2013-99665";
             // 
-            // textBox2
+            // textName
             // 
-            this.textBox2.Cursor = System.Windows.Forms.Cursors.Default;
-            this.textBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox2.Location = new System.Drawing.Point(211, 43);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.ReadOnly = true;
-            this.textBox2.Size = new System.Drawing.Size(284, 24);
-            this.textBox2.TabIndex = 2;
-            this.textBox2.TabStop = false;
-            this.textBox2.Text = "Cipriano Kyle John A. Soriben III";
+            this.textName.Cursor = System.Windows.Forms.Cursors.Default;
+            this.textName.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textName.Location = new System.Drawing.Point(281, 53);
+            this.textName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textName.Name = "textName";
+            this.textName.ReadOnly = true;
+            this.textName.Size = new System.Drawing.Size(377, 29);
+            this.textName.TabIndex = 2;
+            this.textName.TabStop = false;
+            this.textName.Text = "Cipriano Kyle John A. Soriben III";
             // 
-            // textBox3
+            // textTransaction
             // 
-            this.textBox3.Cursor = System.Windows.Forms.Cursors.Default;
-            this.textBox3.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox3.Location = new System.Drawing.Point(212, 73);
-            this.textBox3.Multiline = true;
-            this.textBox3.Name = "textBox3";
-            this.textBox3.ReadOnly = true;
-            this.textBox3.Size = new System.Drawing.Size(284, 45);
-            this.textBox3.TabIndex = 3;
-            this.textBox3.TabStop = false;
-            this.textBox3.Text = "[Registrar] Transcript of Records";
+            this.textTransaction.Cursor = System.Windows.Forms.Cursors.Default;
+            this.textTransaction.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textTransaction.Location = new System.Drawing.Point(283, 90);
+            this.textTransaction.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textTransaction.Multiline = true;
+            this.textTransaction.Name = "textTransaction";
+            this.textTransaction.ReadOnly = true;
+            this.textTransaction.Size = new System.Drawing.Size(377, 54);
+            this.textTransaction.TabIndex = 3;
+            this.textTransaction.TabStop = false;
+            this.textTransaction.Text = "[Registrar] Transcript of Records";
             // 
-            // textBox4
+            // textType
             // 
-            this.textBox4.Cursor = System.Windows.Forms.Cursors.Default;
-            this.textBox4.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox4.Location = new System.Drawing.Point(211, 124);
-            this.textBox4.Name = "textBox4";
-            this.textBox4.ReadOnly = true;
-            this.textBox4.Size = new System.Drawing.Size(284, 24);
-            this.textBox4.TabIndex = 4;
-            this.textBox4.TabStop = false;
-            this.textBox4.Text = "Student";
+            this.textType.Cursor = System.Windows.Forms.Cursors.Default;
+            this.textType.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textType.Location = new System.Drawing.Point(281, 153);
+            this.textType.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textType.Name = "textType";
+            this.textType.ReadOnly = true;
+            this.textType.Size = new System.Drawing.Size(377, 29);
+            this.textType.TabIndex = 4;
+            this.textType.TabStop = false;
+            this.textType.Text = "Student";
             // 
             // currentCustomer
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(508, 155);
-            this.Controls.Add(this.textBox4);
-            this.Controls.Add(this.textBox3);
-            this.Controls.Add(this.textBox2);
-            this.Controls.Add(this.textBox1);
+            this.ClientSize = new System.Drawing.Size(677, 191);
+            this.Controls.Add(this.textType);
+            this.Controls.Add(this.textTransaction);
+            this.Controls.Add(this.textName);
+            this.Controls.Add(this.textID);
             this.Controls.Add(this.panel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "currentCustomer";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "currentCustomer";
@@ -131,10 +138,10 @@
         #endregion
 
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.TextBox textBox4;
+        private System.Windows.Forms.Label textCQN;
+        private System.Windows.Forms.TextBox textID;
+        private System.Windows.Forms.TextBox textName;
+        private System.Windows.Forms.TextBox textTransaction;
+        private System.Windows.Forms.TextBox textType;
     }
 }

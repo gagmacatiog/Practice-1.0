@@ -17,8 +17,9 @@ namespace ServicingTerminalApplication
     
     public partial class Form1 : Form
     {
-        bool clickCheck = false;
-        Form3 f3 = (Form3)Application.OpenForms["form3"];
+        //Form3 f3 = (Form3)Application.OpenForms["form3"];
+        Form f3 = (currentCustomer)Application.OpenForms["currentCustomer"];
+        currentCustomer fnf = new currentCustomer();
         private String connection_string = System.Configuration.ConfigurationManager.ConnectionStrings["dbString"].ConnectionString;
         static int PROGRAM_Servicing_Office = 1;
         static int PROGRAM_window = 2;
@@ -30,16 +31,15 @@ namespace ServicingTerminalApplication
         private static string transaction_type = string.Empty;
         private static string type = string.Empty;
         private static string _customer_queue_number = string.Empty;
-        private static int transaction_type_id;
-        private static int _pattern_max;
-        private static int _pattern_current;
+        //private static int transaction_type_id;
+        //private static int _pattern_max;
+        //private static int _pattern_current;
         private static string w_temp_run = string.Empty;
         private static bool DoneServingRealCustomer = false;
         DataTable table_Modes;
         DataTable table_Transactions;
         DataTable table_Transactions_List;
         DataTable table_Servicing_Office;
-        Form3 fnf = new Form3();
 
         Stopwatch _SERVING_TIME = new Stopwatch();
 
@@ -54,7 +54,6 @@ namespace ServicingTerminalApplication
             Type = "NULL",
             Customer_Queue_Number = "NULL"
         };
-        public _Queue_Info Class_queue { get; private set; }
 
         public Form1()
         {
@@ -64,7 +63,6 @@ namespace ServicingTerminalApplication
             this.Location = new Point(workingArea.Right - Size.Width,
                                       workingArea.Bottom - Size.Height);
             this.TopMost = true;
-
             fnf.FirstNameUpdated += Fnf_FirstNameUpdated;
             fnf.Show();
             //Console.Write("\n Initializing form... Calling getModes() to set table_Modes \n ");
@@ -72,9 +70,9 @@ namespace ServicingTerminalApplication
             table_Transactions = getTransactionInfo();
             table_Transactions_List = getTransactionList();
             table_Servicing_Office = getServicingOfficeList();
-            transaction_type_id = 0;
-            _pattern_max = 0;
-            _pattern_current = 0;
+            //transaction_type_id = 0;
+            //_pattern_max = 0;
+            //_pattern_current = 0;
             w_temp_run += "@ 0Program started. ";
             w_temp_run += "@ 0All Datatables have been generated.";
             Previous_Customer = No_Customer;
@@ -124,6 +122,21 @@ namespace ServicingTerminalApplication
            // else MessageBox.Show("already exist...");
             
             con.Close();
+        }
+        private string getTransactionTypeName(int _tt_id)
+        {
+            int id_temp = 0;
+            string transactionName_temp = "";
+            foreach (DataRow row in table_Transactions.Rows)
+            {
+                id_temp = (int)row["Transaction_Type"];
+                if (id_temp == _tt_id)
+                {
+                    transactionName_temp = (string)row["Transaction_Name"];
+                    break;
+                }
+            }
+            return transactionName_temp;
         }
         private void z(String a)
         {
@@ -457,12 +470,12 @@ namespace ServicingTerminalApplication
         private void Fnf_FirstNameUpdated(object sender, updateForm e)
         {
             // to be used to show data on form #3
-            if(e != null && e.id != null)
-            {   fnf.Label2 = e.id;
-                fnf.Label4 = e.s_id;
-                fnf.Label6 = e.full_name;
-                fnf.Label8 = e.transaction_type;
-                fnf.Label10 = e.type;
+            if(e != null && e.CQN != null)
+            {   fnf.setCQN = e.CQN;
+                fnf.setID = e.s_id;
+                fnf.setName = e.full_name;
+                fnf.setTransaction = e.transaction_type;
+                fnf.setType = e.type;
 
             }
         }
@@ -677,11 +690,11 @@ namespace ServicingTerminalApplication
 
                     // Show the information of the customer.
                     updateForm nuea = new updateForm();
-                    nuea.id = Next_Customer.Queue_Number.ToString();
+                    nuea.CQN = Next_Customer.Customer_Queue_Number.ToString();
                     nuea.type = Next_Customer.Type;
                     nuea.s_id = Next_Customer.Servicing_Office.ToString();
                     nuea.full_name = Next_Customer.Full_Name;
-                    nuea.transaction_type = Next_Customer.Transaction_Type.ToString();
+                    nuea.transaction_type = getTransactionTypeName(Next_Customer.Transaction_Type);
                     fnf.OnFirstNameUpdated(nuea);
 
                     // Start time serving this customer

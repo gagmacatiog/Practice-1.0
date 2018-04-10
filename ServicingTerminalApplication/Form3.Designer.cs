@@ -139,7 +139,6 @@
             this.label10.TabIndex = 9;
             this.label10.Text = "N/A";
             this.label10.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.label10.Click += new System.EventHandler(this.label10_Click);
             // 
             // Form3
             // 

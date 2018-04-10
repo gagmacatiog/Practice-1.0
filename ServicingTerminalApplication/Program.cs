@@ -15,7 +15,7 @@ namespace ServicingTerminalApplication
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new currentCustomer());
+            Application.Run(new Form1());
         }
     }
 }
