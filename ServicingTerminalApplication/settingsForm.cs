@@ -16,6 +16,7 @@ namespace ServicingTerminalApplication
         currentCustomer customerForm = (currentCustomer)Application.OpenForms["currentCustomer"];
         addServicingOffice form_so = (addServicingOffice)Application.OpenForms["addServicingOffice"];
         addTransactionType form_tt = (addTransactionType)Application.OpenForms["addTransactionType"];
+
         public settingsForm()
         {
             InitializeComponent();
@@ -109,12 +110,22 @@ namespace ServicingTerminalApplication
 
         private void button2_Click(object sender, EventArgs e)
         {
-            form_so.Show();
+        if (form_so == null)
+            {
+                form_so = new addServicingOffice();
+            }
+
+            form_so.ShowDialog();
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            form_tt.Show();
+            if (form_tt == null)
+            {
+                form_tt = new addTransactionType();
+            }
+
+            form_tt.ShowDialog();
         }
     }
 }

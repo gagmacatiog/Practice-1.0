@@ -24,6 +24,7 @@ namespace ServicingTerminalApplication
         public currentCustomer()
         {
             InitializeComponent();
+            this.ControlBox = false;
 
         }
         public string setID

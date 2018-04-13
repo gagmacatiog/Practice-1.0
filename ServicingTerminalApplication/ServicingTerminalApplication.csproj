@@ -226,6 +226,7 @@
     <Compile Include="_Queue_Info.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="_Servicing_Office.cs" />
     <EmbeddedResource Include="addServicingOffice.resx">
       <DependentUpon>addServicingOffice.cs</DependentUpon>
     </EmbeddedResource>

@@ -49,7 +49,7 @@
             // 
             // textCQN
             // 
-            this.textCQN.Font = new System.Drawing.Font("Bernard MT Condensed", 35.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textCQN.Font = new System.Drawing.Font("Bernard MT Condensed", 25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textCQN.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.textCQN.Location = new System.Drawing.Point(17, 20);
             this.textCQN.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);

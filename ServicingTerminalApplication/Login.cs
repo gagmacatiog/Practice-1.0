@@ -106,42 +106,46 @@ namespace ServicingTerminalApplication
             string Password = "";
             bool IsExist = false;
             SqlConnection con = new SqlConnection(connection_string);
-            con.Open();
-            SqlCommand cmd = new SqlCommand("SELECT * FROM users WHERE Username = @Username", con);
-            cmd.Parameters.AddWithValue("@Username", textBox1.Text);
-
-            SqlDataReader reader;
-
-            reader = cmd.ExecuteReader();
-            if (reader.Read())
+            try
             {
-                IsExist = true;
-                Password = (string)reader["Password"];
-            }
-            con.Close();
-            if (IsExist)  //if record exis in db , it will return true, otherwise it will return false  
-            {
-                if (Cryptography.Decrypt(Password).Equals(textBox2.Text))
+                con.Open();
+                SqlCommand cmd = new SqlCommand("SELECT * FROM users WHERE Username = @Username", con);
+                cmd.Parameters.AddWithValue("@Username", textBox1.Text);
+
+                SqlDataReader reader;
+
+                reader = cmd.ExecuteReader();
+                if (reader.Read())
                 {
-                    MessageBox.Show("Login Success", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    this.Hide();
-                    new Form1().Show();
+                    IsExist = true;
+                    Password = (string)reader["Password"];
                 }
-                else
+                con.Close();
+                if (IsExist)  //if record exis in db , it will return true, otherwise it will return false  
+                {
+                    if (Cryptography.Decrypt(Password).Equals(textBox2.Text))
+                    {
+                        MessageBox.Show("Login Success", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        this.Hide();
+                        new Form1().Show();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Please enter the valid credentials.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        textBox2.Clear();
+                    }
+
+                }
+                else  //showing the error message if user credential is wrong  
                 {
                     MessageBox.Show("Please enter the valid credentials.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     textBox2.Clear();
                 }
 
-            }
-            else  //showing the error message if user credential is wrong  
-            {
-                MessageBox.Show("Please enter the valid credentials.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                textBox2.Clear();
-            }
 
-            
-        }
+            }
+            catch (SqlException) { MessageBox.Show("Can't connect to local DB");Environment.Exit(0); }
+            }
         
 
         private void textBox_KeyDown(object sender, KeyEventArgs e)

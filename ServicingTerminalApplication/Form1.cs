@@ -17,9 +17,11 @@ namespace ServicingTerminalApplication
     
     public partial class Form1 : Form
     {
+        #region APP INIT VARIABLES
         //Form3 f3 = (Form3)Application.OpenForms["form3"];
         Form f3 = (currentCustomer)Application.OpenForms["currentCustomer"];
         currentCustomer fnf = new currentCustomer();
+        settingsForm frmSettings = new settingsForm();
         private String connection_string = System.Configuration.ConfigurationManager.ConnectionStrings["dbString"].ConnectionString;
         static int PROGRAM_Servicing_Office = 1;
         static int PROGRAM_window = 2;
@@ -54,10 +56,10 @@ namespace ServicingTerminalApplication
             Type = "NULL",
             Customer_Queue_Number = "NULL"
         };
-
+        #endregion
         public Form1()
         {
-            
+            #region CONSTRUCTOR
             InitializeComponent();
             Rectangle workingArea = Screen.GetWorkingArea(this);
             this.Location = new Point(workingArea.Right - Size.Width,
@@ -78,7 +80,9 @@ namespace ServicingTerminalApplication
             Previous_Customer = No_Customer;
             setThisServicingOfficeName();
             AddThisServicingTerminal();
+            #endregion
         }
+        #region METHODS
         private void setThisServicingOfficeName()
         {
             foreach (DataRow row in table_Servicing_Office.Rows)
@@ -123,25 +127,53 @@ namespace ServicingTerminalApplication
             
             con.Close();
         }
-        private string getTransactionTypeName(int _tt_id)
-        {
-            int id_temp = 0;
-            string transactionName_temp = "";
-            foreach (DataRow row in table_Transactions.Rows)
-            {
-                id_temp = (int)row["Transaction_Type"];
-                if (id_temp == _tt_id)
-                {
-                    transactionName_temp = (string)row["Transaction_Name"];
-                    break;
-                }
-            }
-            return transactionName_temp;
-        }
+        
         private void z(String a)
         {
             w_temp_run += a + Environment.NewLine;
         }
+        private void incrementQueueNumber(SqlConnection con, int q_so)
+        {
+            int a = 0;
+            // increment queue number 
+            SqlCommand cmd4;
+            w_temp_run += "@ incrementQueueNumber has been called.";
+            w_temp_run += "@ tbl.Queue_Info will be updated.";
+            String query2 = "update Queue_Info set Current_Queue = Current_Queue+1, Customer_Queue_Number = @q_cqn where Servicing_Office = @Servicing_Office";
+            cmd4 = new SqlCommand(query2, con);
+            cmd4.Parameters.AddWithValue("@Servicing_Office", q_so);
+            cmd4.Parameters.AddWithValue("@q_cqn", _customer_queue_number);
+            cmd4.ExecuteNonQuery();
+            w_temp_run += "@ New values for tbl.Queue_Info at Servicing Office [" + q_so + "]:";
+            w_temp_run += "@ Check Current_Queue incremented by 1, Customer_Queue_Number changed to " + _customer_queue_number;
+        }
+       
+        private bool checkIfNextCustomerExist(int q_cn)
+        {
+            SqlConnection con = new SqlConnection(connection_string);
+            using (con)
+            {
+                con.Open();
+                bool a = false;
+                String _query1 = "select TOP 1 Servicing_Office from Main_Queue where Queue_Number = @qn and Servicing_Office = @sn";
+                SqlCommand _cmd1 = new SqlCommand(_query1, con);
+                _cmd1.Parameters.AddWithValue("@sn", PROGRAM_Servicing_Office);
+                _cmd1.Parameters.AddWithValue("@qn", q_cn);
+                object r = _cmd1.ExecuteScalar();
+                if (r != null) a = true;
+                else
+                {
+                    //code to handle the null case here...
+                    MessageBox.Show("False");
+                }
+                con.Close();
+                return a;
+
+            }
+        }
+        #endregion
+
+        #region FIREBASE METHODS (NOT USED)
         private async void Terminal_Delete_MainQueue(int q_id)
         {
             firebase_Connection fcon = new firebase_Connection();
@@ -177,22 +209,11 @@ namespace ServicingTerminalApplication
             fcon.App_Update_QueueInfo(_servicing_office,a);
 
         }
-        private void incrementQueueNumber(SqlConnection con, int q_so)
+        #endregion
+
+        #region GET METHODS
+        private int getNextCustomerID()
         {
-            int a = 0;
-            // increment queue number 
-            SqlCommand cmd4;
-            w_temp_run += "@ incrementQueueNumber has been called.";
-            w_temp_run += "@ tbl.Queue_Info will be updated.";
-            String query2 = "update Queue_Info set Current_Queue = Current_Queue+1, Customer_Queue_Number = @q_cqn where Servicing_Office = @Servicing_Office";
-            cmd4 = new SqlCommand(query2, con);
-            cmd4.Parameters.AddWithValue("@Servicing_Office", q_so);
-            cmd4.Parameters.AddWithValue("@q_cqn", _customer_queue_number);
-            cmd4.ExecuteNonQuery();
-            w_temp_run += "@ New values for tbl.Queue_Info at Servicing Office ["+q_so+"]:";
-            w_temp_run += "@ Check Current_Queue incremented by 1, Customer_Queue_Number changed to "+_customer_queue_number;
-        }
-        private int getNextCustomerID() {
             SqlConnection con = new SqlConnection(connection_string);
             using (con)
             {
@@ -211,30 +232,22 @@ namespace ServicingTerminalApplication
                 con.Close();
                 return a;
             }
-            
-        }
-        private bool checkIfNextCustomerExist(int q_cn)
-        {
-            SqlConnection con = new SqlConnection(connection_string);
-            using (con)
-            {
-                con.Open();
-                bool a = false;
-                String _query1 = "select TOP 1 Servicing_Office from Main_Queue where Queue_Number = @qn and Servicing_Office = @sn";
-                SqlCommand _cmd1 = new SqlCommand(_query1, con);
-                _cmd1.Parameters.AddWithValue("@sn", PROGRAM_Servicing_Office);
-                _cmd1.Parameters.AddWithValue("@qn", q_cn);
-                object r = _cmd1.ExecuteScalar();
-                if (r != null) a = true;
-                else
-                {
-                    //code to handle the null case here...
-                    MessageBox.Show("False");
-                }
-                con.Close();
-                return a;
 
+        }
+        private string getTransactionTypeName(int _tt_id)
+        {
+            int id_temp = 0;
+            string transactionName_temp = "";
+            foreach (DataRow row in table_Transactions.Rows)
+            {
+                id_temp = (int)row["Transaction_Type"];
+                if (id_temp == _tt_id)
+                {
+                    transactionName_temp = (string)row["Transaction_Name"];
+                    break;
+                }
             }
+            return transactionName_temp;
         }
         private DataTable getServicingOfficeList()
         {
@@ -497,9 +510,18 @@ namespace ServicingTerminalApplication
 
             base.WndProc(ref m);
         }
+        #endregion
 
-      
+        #region OBJECT METHODS
+        private void button1_Click_1(object sender, EventArgs e)
+        {
 
+            if (frmSettings.Visible)
+                return;
+
+            frmSettings = new settingsForm();
+            frmSettings.Show();
+        }
         private void onMouseClick(object sender, EventArgs e)
         {
             if (((PictureBox)sender) == pictureBox1)
@@ -536,7 +558,9 @@ namespace ServicingTerminalApplication
                 ((PictureBox)sender).Image = ServicingTerminalApplication.Properties.Resources.deleteBtn;
             }
         }
+        #endregion
 
+        #region MAIN METHODS
         private void Next()
         {
             SqlConnection con = new SqlConnection(connection_string);
@@ -572,6 +596,7 @@ namespace ServicingTerminalApplication
                         Type = ((Boolean)Reader1["Type"] == false) ? "Student" : "Guest",
                         Customer_Queue_Number = (string)Reader1["Customer_Queue_Number"],
                         ID = (int)Reader1["id"],
+                        Student_No = ((Boolean)Reader1["Type"] == false) ? (string)Reader1["Student_No"] : "",
                         Pattern_Current = (int)Reader1["Pattern_Current"]
                     };
                     CommandQuickUpdate = new SqlCommand(QUERY_mq_next_customer_update_on_success, con);
@@ -601,6 +626,7 @@ namespace ServicingTerminalApplication
                             Type = ((Boolean)Reader2["Type"] == false) ? "Student" : "Guest",
                             Customer_Queue_Number = (string)Reader2["Customer_Queue_Number"],
                             ID = (int)Reader2["Main_Queue_ID"],
+                            Student_No = ((Boolean)Reader1["Type"] == false) ? (string)Reader1["Student_No"] : "",
                             Pattern_Current = (int)Reader2["Pattern_Current"]
                         };
                         CommandQuickUpdate = new SqlCommand(QUERY_tq_next_customer_update_on_success, con);
@@ -631,8 +657,9 @@ namespace ServicingTerminalApplication
                         int _serving_time_average = 1;
                         // Delete oldest entry
                         string QUERY_Delete_Oldest_ServingTime = "DELETE FROM Serving_Time WHERE id IN " +
-                            "(SELECT TOP 1 id FROM Serving_Time order by id asc)";
+                            "(SELECT TOP 1 id FROM Serving_Time where Servicing_Office = @param1 order by id asc)";
                         SqlCommand CMD_Delete_Oldest_ServingTime = new SqlCommand(QUERY_Delete_Oldest_ServingTime, con);
+                        CMD_Delete_Oldest_ServingTime.Parameters.AddWithValue("@param1", PROGRAM_Servicing_Office);
                         CMD_Delete_Oldest_ServingTime.ExecuteNonQuery();
 
                         z("-->Deleting oldest row on ast");
@@ -692,7 +719,7 @@ namespace ServicingTerminalApplication
                     updateForm nuea = new updateForm();
                     nuea.CQN = Next_Customer.Customer_Queue_Number.ToString();
                     nuea.type = Next_Customer.Type;
-                    nuea.s_id = Next_Customer.Servicing_Office.ToString();
+                    nuea.s_id = Next_Customer.Student_No;
                     nuea.full_name = Next_Customer.Full_Name;
                     nuea.transaction_type = getTransactionTypeName(Next_Customer.Transaction_Type);
                     fnf.OnFirstNameUpdated(nuea);
@@ -814,10 +841,8 @@ namespace ServicingTerminalApplication
             }
             z("END of MoveCustomerToNextOrDelete function.");
         }
+        #endregion 
 
-        private void button1_Click_1(object sender, EventArgs e)
-        {
-            new settingsForm().Show();
-        }
+
     }
 }
