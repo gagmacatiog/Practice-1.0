@@ -15,6 +15,8 @@ namespace ServicingTerminalApplication
     public partial class Login : Form
     {
         private String connection_string = System.Configuration.ConfigurationManager.ConnectionStrings["dbString"].ConnectionString;
+        private int _user_status = 0;
+        private int _user_id = 0;
         public Login()
         {
             InitializeComponent();
@@ -119,6 +121,8 @@ namespace ServicingTerminalApplication
                 {
                     IsExist = true;
                     Password = (string)reader["Password"];
+                    _user_status = (int)reader["Status"];
+                    _user_id = (int)reader["id"];
                 }
                 con.Close();
                 if (IsExist)  //if record exis in db , it will return true, otherwise it will return false  
@@ -127,7 +131,7 @@ namespace ServicingTerminalApplication
                     {
                         MessageBox.Show("Login Success", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         this.Hide();
-                        new Form1().Show();
+                        new Form1(_user_status,_user_id).Show();
                     }
                     else
                     {

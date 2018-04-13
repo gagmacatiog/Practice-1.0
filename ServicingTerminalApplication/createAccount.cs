@@ -120,7 +120,7 @@ namespace ServicingTerminalApplication
             if (textBox1.TextLength < 100  && textBox1.TextLength > 10 
                 && textBox2.TextLength < 100 && textBox2.TextLength > 10 
                 && textBox3.TextLength < 50 && textBox3.TextLength > 5
-                && textBox4.TextLength < 50 && textBox4.TextLength > 8)
+                && textBox4.TextLength < 50 && textBox4.TextLength > 7)
             {
                 return true;
             }

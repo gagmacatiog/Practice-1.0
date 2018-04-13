@@ -20,7 +20,7 @@ namespace ServicingTerminalApplication
             comboBox1.SelectedIndex = 9;
             textBox3.ScrollBars = ScrollBars.Vertical;
         }
-        public List<_Servicing_Office> getServicingOffices()
+        private List<_Servicing_Office> getServicingOffices()
         {
 
             List<_Servicing_Office> dataSource = new List<_Servicing_Office>();

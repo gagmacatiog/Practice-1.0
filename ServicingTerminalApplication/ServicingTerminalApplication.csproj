@@ -227,6 +227,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="_Servicing_Office.cs" />
+    <Compile Include="_Transaction_Type.cs" />
+    <Compile Include="_Users.cs" />
     <EmbeddedResource Include="addServicingOffice.resx">
       <DependentUpon>addServicingOffice.cs</DependentUpon>
     </EmbeddedResource>

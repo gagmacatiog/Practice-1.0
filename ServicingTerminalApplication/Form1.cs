@@ -22,6 +22,8 @@ namespace ServicingTerminalApplication
         Form f3 = (currentCustomer)Application.OpenForms["currentCustomer"];
         currentCustomer fnf = new currentCustomer();
         settingsForm frmSettings = new settingsForm();
+        public int user_type { get; set; } = 0;
+        public int user_id { get; set; } = 0;
         private String connection_string = System.Configuration.ConfigurationManager.ConnectionStrings["dbString"].ConnectionString;
         static int PROGRAM_Servicing_Office = 1;
         static int PROGRAM_window = 2;
@@ -57,7 +59,7 @@ namespace ServicingTerminalApplication
             Customer_Queue_Number = "NULL"
         };
         #endregion
-        public Form1()
+        public Form1(int _a_user_type, int _a_user_id)
         {
             #region CONSTRUCTOR
             InitializeComponent();
@@ -80,6 +82,8 @@ namespace ServicingTerminalApplication
             Previous_Customer = No_Customer;
             setThisServicingOfficeName();
             AddThisServicingTerminal();
+            user_type = _a_user_type;
+            user_id = _a_user_id;
             #endregion
         }
         #region METHODS
@@ -325,7 +329,7 @@ namespace ServicingTerminalApplication
                     break;
                 }
             }
-            MessageBox.Show("nextServicingOffice returns = "+a+"at Pattern#"+temp_pattern_no);
+            z("------>>>nextServicingOffice returns = "+a+"at Pattern#"+temp_pattern_no);
             return a;
         }
         private DataTable getTransactionInfo()
@@ -709,7 +713,7 @@ namespace ServicingTerminalApplication
                     //Check first if the Servicing App is holding a real customer to move him to the next one or not.
                     MoveCustomerToNextOrDelete(con);
                     Previous_Customer = No_Customer;
-                    MessageBox.Show("Empty Customers.");
+                    z("Empty Customers.");
                 }
                 else
                 {
@@ -792,11 +796,11 @@ namespace ServicingTerminalApplication
                     deleteCommand = new SqlCommand(QUERY_delete_MainQueue_onNext, con);
                     deleteCommand.Parameters.AddWithValue("@param_unique_id", Previous_Customer.ID);
                     z("Deleting from Table: Main_Queue with id of " + Previous_Customer.ID);
-                    MessageBox.Show("Customer id#" + Previous_Customer.ID + " deleted!");
+                    z("Customer id#" + Previous_Customer.ID + " deleted!");
                     deleteCommand.ExecuteNonQuery();
                     z("Real customer is deleted.");
                 }
-                else { MessageBox.Show("Previous customer is a null."); z("NULL Customer is ignored. Nothing is deleted"); }
+                else { z("Previous customer is a null."); z("NULL Customer is ignored. Nothing is deleted"); }
             }
             else
             {
