@@ -601,7 +601,8 @@ namespace ServicingTerminalApplication
                         Customer_Queue_Number = (string)Reader1["Customer_Queue_Number"],
                         ID = (int)Reader1["id"],
                         Student_No = ((Boolean)Reader1["Type"] == false) ? (string)Reader1["Student_No"] : "",
-                        Pattern_Current = (int)Reader1["Pattern_Current"]
+                        Pattern_Current = (int)Reader1["Pattern_Current"],
+                        Transfer_Customer = false
                     };
                     CommandQuickUpdate = new SqlCommand(QUERY_mq_next_customer_update_on_success, con);
                     CommandQuickUpdate.Parameters.AddWithValue("@param_qs", "Serving");
@@ -631,7 +632,8 @@ namespace ServicingTerminalApplication
                             Customer_Queue_Number = (string)Reader2["Customer_Queue_Number"],
                             ID = (int)Reader2["Main_Queue_ID"],
                             Student_No = ((Boolean)Reader1["Type"] == false) ? (string)Reader1["Student_No"] : "",
-                            Pattern_Current = (int)Reader2["Pattern_Current"]
+                            Pattern_Current = (int)Reader2["Pattern_Current"],
+                            Transfer_Customer = true
                         };
                         CommandQuickUpdate = new SqlCommand(QUERY_tq_next_customer_update_on_success, con);
                         CommandQuickUpdate.Parameters.AddWithValue("@param_qs", "Serving");

@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace ServicingTerminalApplication
 {
     public class _Main_Queue
@@ -15,5 +17,6 @@ namespace ServicingTerminalApplication
         public string Customer_Queue_Number { get; set; }
         public string Type { get; set; }
         public string Queue_Status { get; set; }
+        public bool Transfer_Customer { get; set; } = false;
     }
 }
