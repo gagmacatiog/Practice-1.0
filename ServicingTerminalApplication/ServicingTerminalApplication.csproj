@@ -202,6 +202,12 @@
     <Compile Include="Login.Designer.cs">
       <DependentUpon>Login.cs</DependentUpon>
     </Compile>
+    <Compile Include="OfficeConfirmation.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OfficeConfirmation.Designer.cs">
+      <DependentUpon>OfficeConfirmation.cs</DependentUpon>
+    </Compile>
     <Compile Include="settingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -249,6 +255,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Login.resx">
       <DependentUpon>Login.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OfficeConfirmation.resx">
+      <DependentUpon>OfficeConfirmation.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

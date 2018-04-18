@@ -131,7 +131,7 @@ namespace ServicingTerminalApplication
                     {
                         MessageBox.Show("Login Success", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         this.Hide();
-                        new Form1(_user_status,_user_id).Show();
+                        new OfficeConfirmation(_user_status,_user_id).Show();
                     }
                     else
                     {
