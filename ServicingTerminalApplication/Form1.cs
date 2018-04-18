@@ -26,7 +26,7 @@ namespace ServicingTerminalApplication
         public int user_id { get; set; } = 0;
         private String connection_string = System.Configuration.ConfigurationManager.ConnectionStrings["dbString"].ConnectionString;
         static int PROGRAM_Servicing_Office = 1;
-        static int PROGRAM_window = 2;
+        int PROGRAM_window = 0;
         private static int PROGRAM_modeCounter = 0;
         private static string PROGRAM_Servicing_Office_Name = string.Empty;
         private static string id = string.Empty;
@@ -59,7 +59,7 @@ namespace ServicingTerminalApplication
             Customer_Queue_Number = "NULL"
         };
         #endregion
-        public Form1(int _a_user_type, int _a_user_id, string _a_user_window)
+        public Form1(int _a_user_type, int _a_user_id, int _a_user_window)
         {
             #region CONSTRUCTOR
             InitializeComponent();
@@ -81,9 +81,10 @@ namespace ServicingTerminalApplication
             w_temp_run += "@ 0All Datatables have been generated.";
             Previous_Customer = No_Customer;
             setThisServicingOfficeName();
-            AddThisServicingTerminal();
             user_type = _a_user_type;
             user_id = _a_user_id;
+            PROGRAM_window = _a_user_window;
+            AddThisServicingTerminal();
             #endregion
         }
         #region METHODS
@@ -536,6 +537,41 @@ namespace ServicingTerminalApplication
             else
             {
                 // If delete button is clicked
+                // Delete the customer
+                var confirmResult = MessageBox.Show("Are you sure to delete this queue?",
+                                     "Delete?",
+                                     MessageBoxButtons.YesNo);
+                if (confirmResult == DialogResult.Yes)
+                {
+                    // If 'Yes', do something here.
+                    SqlConnection con = new SqlConnection(connection_string);
+                    con.Open();
+                    if (Next_Customer.ID > 0)
+                    {
+                        //Remove the customer from the Table:Main_Queue
+                        SqlCommand deleteCommand;
+                        String QUERY_delete_MainQueue_onNext = "delete from Main_Queue where id = @param_unique_id";
+                        deleteCommand = new SqlCommand(QUERY_delete_MainQueue_onNext, con);
+                        deleteCommand.Parameters.AddWithValue("@param_unique_id", Next_Customer.ID);
+                        Console.WriteLine("Deleting from Table: Main_Queue with id of " + Next_Customer.ID);
+                        Console.WriteLine("Customer id#" + Next_Customer.ID + " deleted!");
+                        deleteCommand.ExecuteNonQuery();
+                        Console.WriteLine("Real customer is deleted.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Previous customer is a null.");
+                        Console.WriteLine("NULL Customer is ignored. Nothing is deleted");
+                    }
+                    Next_Customer = No_Customer;
+                    Previous_Customer = No_Customer;
+                    con.Close();
+                }
+                else
+                {
+                    // If 'No', do something here.
+                }
+                
             }
         }
 

@@ -14,6 +14,7 @@ namespace ServicingTerminalApplication
     public partial class addTransactionType : Form
     {
         private String connection_string = System.Configuration.ConfigurationManager.ConnectionStrings["dbString"].ConnectionString;
+        settingsForm sForm = (settingsForm)Application.OpenForms["settingsForm"];
         public addTransactionType()
         {
             InitializeComponent();
@@ -175,6 +176,9 @@ namespace ServicingTerminalApplication
                     }
                 transaction.Commit();
                 con.Close();
+                if (sForm != null)
+                    sForm.generateDeleteItems();
+                MessageBox.Show("New Transaction Type added.","Success!" );
             }
             catch (SqlException ex) {
                 transaction.Rollback();

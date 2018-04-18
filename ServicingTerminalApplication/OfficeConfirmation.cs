@@ -23,13 +23,14 @@ namespace ServicingTerminalApplication
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if(textBox1.Text == "")
+            int window_value = (int)numericUpDown1.Value;
+            if(window_value == 0)
             {
-                MessageBox.Show("Fill the text field!", "Invalid value.", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("Fill the window field!", "Invalid value.", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }else
             {
                 this.Hide();
-                new Form1(user_type, user_id, textBox1.Text).Show();
+                new Form1(user_type, user_id, window_value).Show();
             }
         }
     }
