@@ -59,7 +59,7 @@ namespace ServicingTerminalApplication
             Customer_Queue_Number = "NULL"
         };
         #endregion
-        public Form1(int _a_user_type, int _a_user_id)
+        public Form1(int _a_user_type, int _a_user_id, string _a_user_window)
         {
             #region CONSTRUCTOR
             InitializeComponent();
