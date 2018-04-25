@@ -2,6 +2,7 @@
 using Firebase.Auth.Payloads;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
@@ -19,15 +20,17 @@ namespace ServicingTerminalApplication
     {
         #region APP INIT VARIABLES
         //Form3 f3 = (Form3)Application.OpenForms["form3"];
-        Form f3 = (currentCustomer)Application.OpenForms["currentCustomer"];
-        currentCustomer fnf = new currentCustomer();
+        //Form f3 = (currentCustomer)Application.OpenForms["currentCustomer"];
+        //currentCustomer fnf = new currentCustomer();
         settingsForm frmSettings = new settingsForm();
+        FormHoldCustomers frmHoldCustomers;
         public int user_type { get; set; } = 0;
         public int user_id { get; set; } = 0;
         private String connection_string = System.Configuration.ConfigurationManager.ConnectionStrings["dbString"].ConnectionString;
         static int PROGRAM_Servicing_Office = 1;
         int PROGRAM_window = 0;
         private static int PROGRAM_modeCounter = 0;
+        private bool PROGRAM_ServeMobileCustomer = false;
         private static string PROGRAM_Servicing_Office_Name = string.Empty;
         private static string id = string.Empty;
         private static string s_id = string.Empty;
@@ -38,8 +41,7 @@ namespace ServicingTerminalApplication
         //private static int transaction_type_id;
         //private static int _pattern_max;
         //private static int _pattern_current;
-        private static string w_temp_run = string.Empty;
-        private static bool DoneServingRealCustomer = false;
+        private string w_temp_run = string.Empty;
         DataTable table_Modes;
         DataTable table_Transactions;
         DataTable table_Transactions_List;
@@ -47,17 +49,31 @@ namespace ServicingTerminalApplication
 
         Stopwatch _SERVING_TIME = new Stopwatch();
 
-        _Main_Queue Next_Customer = new _Main_Queue();
-        _Main_Queue Previous_Customer = new _Main_Queue();
-        _Main_Queue No_Customer = new _Main_Queue
+        public _Main_Queue Next_Customer = new _Main_Queue();
+        public _Main_Queue Previous_Customer = new _Main_Queue();
+        public _Main_Queue No_Customer = new _Main_Queue
         {
             Queue_Number = 0,
             Full_Name = "NULL",
             Servicing_Office = 0,
             Transaction_Type = 0,
             Type = "NULL",
-            Customer_Queue_Number = "NULL"
+            Customer_Queue_Number = "NULL",
+            Customer_From = "NULL"
         };
+        public _Main_Queue Clear_Customer = new _Main_Queue
+        {
+            Queue_Number = 0,
+            Full_Name = " ",
+            Servicing_Office = 0,
+            Transaction_Type = 0,
+            Type = " ",
+            Customer_Queue_Number = " ",
+            Customer_From = " "
+        };
+        public _Main_Queue Hold_Customer = new _Main_Queue();
+
+        public List<_Main_Queue> LIST_Customers_On_Hold = new List<_Main_Queue>();
         #endregion
         public Form1(int _a_user_type, int _a_user_id, int _a_user_window)
         {
@@ -67,8 +83,10 @@ namespace ServicingTerminalApplication
             this.Location = new Point(workingArea.Right - Size.Width,
                                       workingArea.Bottom - Size.Height);
             this.TopMost = true;
+            /**
+             * Disabled when removed currentCustomer (April 24, 2018)
             fnf.FirstNameUpdated += Fnf_FirstNameUpdated;
-            fnf.Show();
+            fnf.Show();**/
             //Console.Write("\n Initializing form... Calling getModes() to set table_Modes \n ");
             table_Modes = getModes();
             table_Transactions = getTransactionInfo();
@@ -80,14 +98,56 @@ namespace ServicingTerminalApplication
             w_temp_run += "@ 0Program started. ";
             w_temp_run += "@ 0All Datatables have been generated.";
             Previous_Customer = No_Customer;
+            Hold_Customer = No_Customer;
             setThisServicingOfficeName();
             user_type = _a_user_type;
             user_id = _a_user_id;
             PROGRAM_window = _a_user_window;
             AddThisServicingTerminal();
+            RefreshHoldList();
             #endregion
         }
         #region METHODS
+        public void updateCustomerInfoShown(_Main_Queue thisCustomer)
+        {
+            textCQN.Text = thisCustomer.Customer_Queue_Number.ToString();
+            textType.Text = thisCustomer.Type;
+            textID.Text = thisCustomer.Student_No;
+            textName.Text = thisCustomer.Full_Name;
+            textTransaction.Text = getTransactionTypeName(thisCustomer.Transaction_Type);
+        }
+        private void RefreshHoldList()
+        {
+            LIST_Customers_On_Hold.Clear();
+            SqlConnection con = new SqlConnection(connection_string);
+            con.Open();
+            string query = "select * from Main_Queue where Queue_Status = @param1";
+            SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@param1", "Hold");
+            SqlDataReader rdr;
+            rdr = cmd.ExecuteReader();
+            while (rdr.Read())
+            {
+                _Main_Queue a = new _Main_Queue
+                {
+                    Customer_Queue_Number = (string)rdr["Customer_Queue_Number"],
+                    Full_Name = (string)rdr["Full_Name"],
+                    ID = (int)rdr["ID"],
+                    Pattern_Current = (int)rdr["Pattern_Current"],
+                    Pattern_Max = (int)rdr["Pattern_Max"],
+                    Queue_Number = (int)rdr["Queue_Number"],
+                    Queue_Status = (string)rdr["Queue_Status"],
+                    Servicing_Office = (int)rdr["Servicing_Office"],
+                    Student_No = (string)rdr["Student_No"],
+                    Time = (DateTime)rdr["Time"],
+                    Transaction_Type = (int)rdr["Transaction_Type"],
+                    Type = ((Boolean)rdr["Type"] == false) ? "Student" : "Guest",
+                    Customer_From = ((Boolean)rdr["Customer_From"] == false) ? "Local" : "Mobile",
+                };
+                LIST_Customers_On_Hold.Add(a);
+            }
+            con.Close();
+        }
         private void setThisServicingOfficeName()
         {
             foreach (DataRow row in table_Servicing_Office.Rows)
@@ -217,6 +277,10 @@ namespace ServicingTerminalApplication
         #endregion
 
         #region GET METHODS
+        private void Mode_Set()
+        {
+
+        }
         private int getNextCustomerID()
         {
             SqlConnection con = new SqlConnection(connection_string);
@@ -412,7 +476,7 @@ namespace ServicingTerminalApplication
             x = (int)internal_Command1.ExecuteScalar();
             return x;
         }
-        private int geQueueCurrentNumber(int What_Servicing_Office, SqlConnection con)
+        private int getQueueCurrentNumber(int What_Servicing_Office, SqlConnection con)
         {
             int x = 0;
             SqlCommand internal_Command1;
@@ -439,8 +503,9 @@ namespace ServicingTerminalApplication
             // Counts how many customers are on the queue of this Servicing_Office
             int x = 0;
             SqlCommand internal_Command1;
-            string QUERY_retrieve_MainQueue_amount = "select COUNT(id) from Main_Queue where Servicing_Office = @param_so";
+            string QUERY_retrieve_MainQueue_amount = "select COUNT(id) from Main_Queue where Servicing_Office = @param_so and Queue_Status = @param_qs";
             internal_Command1 = new SqlCommand(QUERY_retrieve_MainQueue_amount, con);
+            internal_Command1.Parameters.AddWithValue("@param_qs", "Waiting");
             internal_Command1.Parameters.AddWithValue("@param_so", What_Servicing_Office);
             x = (int)internal_Command1.ExecuteScalar();
             return x;
@@ -453,7 +518,9 @@ namespace ServicingTerminalApplication
             int mode_number = 0;
 
             current_queue_amount = getCurrentQueueAmount(PROGRAM_Servicing_Office,con);
-
+            string query = "";
+            SqlCommand cmd = new SqlCommand();
+            cmd.Connection = con;
             foreach (DataRow row in table_Modes.Rows)
             {
                 // checks what mode is to be used when serving customers on queue
@@ -469,22 +536,40 @@ namespace ServicingTerminalApplication
                     break;
                 }
             }
+            retrieved_counter++;
+            Console.WriteLine("if {0} < {1}", retrieved_counter, count_walkin);
             if (retrieved_counter < count_walkin)
             {
+                
                 // increment, continue accepting walk-ins
                 //Console.Write(" \n ** Mode_Check() -> Incrementing modeCounter ** \n ");
-                PROGRAM_modeCounter++;
+                query = "update Queue_Info set Counter = Counter + 1, Mode = @param_m where Servicing_Office = @param_so";
+                cmd.CommandText = query;
+                cmd.Parameters.AddWithValue("@param_so", PROGRAM_Servicing_Office);
+                cmd.Parameters.AddWithValue("@param_m", mode_number);
+                cmd.ExecuteNonQuery();
+                z("->?? Next one is walk-ins");
+                //PROGRAM_modeCounter++;
             }
             else
             {
                 //Console.Write(" \n * Mode_Check() -> Resetting modeCounter ** \n ");
-                PROGRAM_modeCounter = 0;
-                // reset the counter, add a code (not here) to pick a mobile user
+                //PROGRAM_modeCounter = 0;
+                query = "update Queue_Info set Counter = 0, Mode = @param_m where Servicing_Office = @param_so";
+                cmd.CommandText = query;
+                cmd.Parameters.AddWithValue("@param_so", PROGRAM_Servicing_Office);
+                cmd.Parameters.AddWithValue("@param_m", mode_number);
+                cmd.ExecuteNonQuery();
+                // reset the counter, add a code (on Next()) to pick a mobile user
+                PROGRAM_ServeMobileCustomer = true;
+                z("->?? Next one is online");
             }
             //return x;
 
             
         }
+        /**
+             * Disabled when removed currentCustomer (April 24, 2018)
         private void Fnf_FirstNameUpdated(object sender, updateForm e)
         {
             // to be used to show data on form #3
@@ -497,7 +582,7 @@ namespace ServicingTerminalApplication
 
             }
         }
-
+        **/
         private void Form1_Load(object sender, EventArgs e)
         {
 
@@ -525,19 +610,23 @@ namespace ServicingTerminalApplication
                 return;
 
             frmSettings = new settingsForm();
-            frmSettings.Show();
+            frmSettings.StartPosition = FormStartPosition.CenterScreen;
+            frmSettings.ShowDialog();
         }
         private void onMouseClick(object sender, EventArgs e)
         {
-            if (((PictureBox)sender) == pictureBox1)
+            if (((PictureBox)sender) == pictureBoxNEXT)
             {
                 // If next button is clicked
+                Console.WriteLine(" START ------------------- NEXT --------------------");
                 Next();
+                Console.WriteLine(" END ------------------- NEXT --------------------");
             }
-            else
+            else if (((PictureBox)sender) == pictureBoxDELETE)
             {
                 // If delete button is clicked
                 // Delete the customer
+                Console.WriteLine(" START ------------------- DELETE --------------------");
                 var confirmResult = MessageBox.Show("Are you sure to delete this queue?",
                                      "Delete?",
                                      MessageBoxButtons.YesNo);
@@ -571,13 +660,35 @@ namespace ServicingTerminalApplication
                 {
                     // If 'No', do something here.
                 }
-                
+                Console.WriteLine(" END ------------------- DELETE --------------------");
+            }
+            else if (((PictureBox)sender) == pictureBoxHOLD)
+            {
+
+                Console.WriteLine(" START ------------------- HOLD --------------------");
+                HoldThisCustomer();
+                Console.WriteLine(" END ------------------- HOLD --------------------");
+            }
+            else if (((PictureBox)sender) == pictureBoxViewHold)
+            {
+
+                Console.WriteLine(" START ------------------- HOLD-FORM --------------------");
+                RefreshHoldList();
+                frmHoldCustomers = new FormHoldCustomers(LIST_Customers_On_Hold);
+                frmHoldCustomers.StartPosition = FormStartPosition.CenterScreen;
+                frmHoldCustomers.ShowDialog();
+                Console.WriteLine(" END ------------------- HOLD-FORM --------------------");
+            }
+            else
+            {
+                Console.WriteLine("onMouseClick does not know what picturebox called it.");
+                // do nothing
             }
         }
 
         private void onHover(object sender, EventArgs e)
         {
-            if(((PictureBox)sender) == pictureBox1)
+            if(((PictureBox)sender) == pictureBoxHOLD)
             {
                 ((PictureBox)sender).Image = ServicingTerminalApplication.Properties.Resources.nextBtn_pressed;
             }
@@ -589,7 +700,7 @@ namespace ServicingTerminalApplication
 
         private void onMouseLeave(object sender, EventArgs e)
         {
-            if (((PictureBox)sender) == pictureBox1)
+            if (((PictureBox)sender) == pictureBoxHOLD)
             {
                 ((PictureBox)sender).Image = ServicingTerminalApplication.Properties.Resources.nextBtn;
             }
@@ -601,7 +712,44 @@ namespace ServicingTerminalApplication
         #endregion
 
         #region MAIN METHODS
-        private void Next()
+        private void HoldThisCustomer()
+        {
+            if (Next_Customer.ID > 0)
+            {
+                string q = "Hold_Customer is " + Hold_Customer.Customer_Queue_Number + Environment.NewLine
+                    + "Next_Customer is " + Next_Customer.Customer_Queue_Number + Environment.NewLine
+                    + "Previous_Customer is " + Previous_Customer.Customer_Queue_Number + Environment.NewLine;
+                Console.WriteLine(q);
+                Hold_Customer = Next_Customer;
+                Next_Customer = No_Customer;
+                Previous_Customer = No_Customer;
+                updateCustomerInfoShown(Clear_Customer);
+                SqlConnection con = new SqlConnection(connection_string);
+                string query = "update Main_Queue set Queue_Status = @param1 OUTPUT Inserted.id where Customer_Queue_Number = @paramcqn ";
+               
+                con.Open();
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@param1", "Hold");
+                cmd.Parameters.AddWithValue("@paramcqn", Hold_Customer.Customer_Queue_Number);
+                Console.WriteLine(""+cmd.ExecuteScalar().ToString());
+
+                
+                RefreshHoldList();
+                
+
+                con.Close();
+
+                Console.WriteLine("update Main_Queue set Queue_Status = Hold where id = {0}", Hold_Customer.Customer_Queue_Number);
+                MessageBox.Show(Hold_Customer.Full_Name+" is now on hold.");
+            }
+            else
+            {
+                Console.WriteLine("Customer currently serving is NULL.");
+            }
+            Console.WriteLine(w_temp_run);
+            w_temp_run = string.Empty;
+        }
+        public void Next()
         {
             SqlConnection con = new SqlConnection(connection_string);
             using (con)
@@ -609,24 +757,45 @@ namespace ServicingTerminalApplication
                 con.Open();
                 // Called when next button is clicked
                 // declare variables to be used
-                String QUERY_next_customer_mq = "select TOP 1 Pattern_Current, id, Queue_Number, Full_Name, Servicing_Office, Transaction_Type, Type, Customer_Queue_Number from Main_Queue where Servicing_Office = @param_so and Queue_Status = @param_qs order by Queue_Number asc";
-                String QUERY_next_customer_tq = "select TOP 1 Pattern_Current, id, Queue_Number, Full_Name, Servicing_Office, Transaction_Type, Type, Customer_Queue_Number from Main_Queue where Servicing_Office = @param_so and Queue_Status = @param_qs order by Queue_Number asc";
+                String QUERY_next_customer_mq = "select TOP 1 Pattern_Current, id, Queue_Number, Full_Name, Servicing_Office, Transaction_Type, Type, Customer_Queue_Number, Customer_From, Student_No from Main_Queue " +
+                    "where Servicing_Office = @param_so and Queue_Status = @param_qs and Customer_From = @param_cf order by Queue_Number asc";
+                String QUERY_next_customer_online = "select TOP 1 Pattern_Current, id, Queue_Number, Full_Name, Servicing_Office, Transaction_Type, Type, Customer_Queue_Number, Customer_From, Student_No from Main_Queue " +
+                    "where Servicing_Office = @param_so and Queue_Status = @param_qs and Customer_From = @param_cf order by Queue_Number asc";
                 String QUERY_mq_next_customer_update_on_success = "update Main_Queue set Queue_Status = @param_qs where id = @param_uniqueid";
-                String QUERY_tq_next_customer_update_on_success = "update Transfer_Queue set Queue_Status = @param_qs where Main_Queue_ID = @param_uniqueid";
+                //String QUERY_tq_next_customer_update_on_success = "update Transfer_Queue set Queue_Status = @param_qs where Main_Queue_ID = @param_uniqueid";
                 SqlCommand Command1,Command2,CommandQuickUpdate;
                 SqlDataReader Reader1,Reader2;
-                
+                Command1 = new SqlCommand();
+                Command1.Connection = con;
+                Command1.CommandType = CommandType.Text;
+
                 bool _READ_COUNTER = false;
 
-                Command1 = new SqlCommand(QUERY_next_customer_mq, con);
-                Command1.Parameters.AddWithValue("@param_so",PROGRAM_Servicing_Office);
+
+
+                if (PROGRAM_ServeMobileCustomer)
+                {
+                    Command1.CommandText = QUERY_next_customer_online;
+                    Command1.Parameters.AddWithValue("@param_cf", 1);
+                }
+                else
+                {
+                    Command1.CommandText = QUERY_next_customer_mq;
+                    Command1.Parameters.AddWithValue("@param_cf", 0);
+                }
+
+                Command1.Parameters.AddWithValue("@param_so", PROGRAM_Servicing_Office);
                 Command1.Parameters.AddWithValue("@param_qs", "Waiting");
+                PROGRAM_ServeMobileCustomer = false;
+                
+                
                 Reader1 = Command1.ExecuteReader();
 
                 while (Reader1.Read())
                 {
                     _READ_COUNTER = true;
                     z("Customer found on main_queue");
+                    Console.WriteLine("?->" + Reader1["Customer_From"]);
                     Next_Customer = new _Main_Queue
                     {
                         Queue_Number = (int)Reader1["Queue_Number"],
@@ -634,9 +803,10 @@ namespace ServicingTerminalApplication
                         Servicing_Office = (int)Reader1["Servicing_Office"],
                         Transaction_Type = (int)Reader1["Transaction_Type"],
                         Type = ((Boolean)Reader1["Type"] == false) ? "Student" : "Guest",
+                        Customer_From = ((Boolean)Reader1["Customer_From"] == false) ? "Local" : "Mobile",
                         Customer_Queue_Number = (string)Reader1["Customer_Queue_Number"],
                         ID = (int)Reader1["id"],
-                        Student_No = ((Boolean)Reader1["Type"] == false) ? (string)Reader1["Student_No"] : "",
+                        Student_No = ((Boolean)Reader1["Type"] == false) ? (string)Reader1["Student_No"] : "N/A",
                         Pattern_Current = (int)Reader1["Pattern_Current"],
                         Transfer_Customer = false
                     };
@@ -647,38 +817,44 @@ namespace ServicingTerminalApplication
                     z("Setting the customer as \"Currently Serving\" finished.");
 
                 }
-                if (!_READ_COUNTER)
-                {
-                    Command2 = new SqlCommand(QUERY_next_customer_tq, con);
-                    Command2.Parameters.AddWithValue("@param_so", PROGRAM_Servicing_Office);
-                    Command2.Parameters.AddWithValue("@param_qs", "Waiting");
-                    Reader2 = Command2.ExecuteReader();
+                if (!_READ_COUNTER && PROGRAM_ServeMobileCustomer)
+                {   // If it did not received mobile customers because there were none on the Main_Queue,
+                    // pick one from Local
 
-                    while (Reader2.Read())
-                    {
-                        z("read found on transfer queue");
-                        _READ_COUNTER = true;
-                        Next_Customer = new _Main_Queue
-                        {
-                            Queue_Number = (int)Reader2["Queue_Number"],
-                            Full_Name = (string)Reader2["Full_Name"],
-                            Servicing_Office = (int)Reader2["Servicing_Office"],
-                            Transaction_Type = (int)Reader2["Transaction_Type"],
-                            Type = ((Boolean)Reader2["Type"] == false) ? "Student" : "Guest",
-                            Customer_Queue_Number = (string)Reader2["Customer_Queue_Number"],
-                            ID = (int)Reader2["Main_Queue_ID"],
-                            Student_No = ((Boolean)Reader1["Type"] == false) ? (string)Reader1["Student_No"] : "",
-                            Pattern_Current = (int)Reader2["Pattern_Current"],
-                            Transfer_Customer = true
-                        };
-                        CommandQuickUpdate = new SqlCommand(QUERY_tq_next_customer_update_on_success, con);
-                        CommandQuickUpdate.Parameters.AddWithValue("@param_qs", "Serving");
-                        CommandQuickUpdate.Parameters.AddWithValue("@param_uniqueid", (int)Reader2["id"]);
-                        CommandQuickUpdate.ExecuteNonQuery();
-                    }
-                    if (_READ_COUNTER) MessageBox.Show("Customer found on Transfer Table.");
                 }
-                
+                //if (!_READ_COUNTER)
+                //{
+                //    Command2 = new SqlCommand(QUERY_next_customer_mobile, con);
+                //    Command2.Parameters.AddWithValue("@param_so", PROGRAM_Servicing_Office);
+                //    Command2.Parameters.AddWithValue("@param_qs", "Waiting");
+                //    Reader2 = Command2.ExecuteReader();
+
+                //    while (Reader2.Read())
+                //    {
+                //        z("read found on transfer queue");
+                //        _READ_COUNTER = true;
+                //        Next_Customer = new _Main_Queue
+                //        {
+                //            Queue_Number = (int)Reader2["Queue_Number"],
+                //            Full_Name = (string)Reader2["Full_Name"],
+                //            Servicing_Office = (int)Reader2["Servicing_Office"],
+                //            Transaction_Type = (int)Reader2["Transaction_Type"],
+                //            Type = ((Boolean)Reader2["Type"] == false) ? "Student" : "Guest",
+                //            Customer_From = ((Boolean)Reader2["Customer_From"] == false) ? "Local" : "Mobile",
+                //            Customer_Queue_Number = (string)Reader2["Customer_Queue_Number"],
+                //            ID = (int)Reader2["Main_Queue_ID"],
+                //            Student_No = ((Boolean)Reader1["Type"] == false) ? (string)Reader1["Student_No"] : "",
+                //            Pattern_Current = (int)Reader2["Pattern_Current"],
+                //            Transfer_Customer = true
+                //        };
+                //        CommandQuickUpdate = new SqlCommand(QUERY_tq_next_customer_update_on_success, con);
+                //        CommandQuickUpdate.Parameters.AddWithValue("@param_qs", "Serving");
+                //        CommandQuickUpdate.Parameters.AddWithValue("@param_uniqueid", (int)Reader2["id"]);
+                //        CommandQuickUpdate.ExecuteNonQuery();
+                //    }
+                //    if (_READ_COUNTER) MessageBox.Show("Customer found on Transfer Table.");
+                //}
+                if (!_READ_COUNTER) Console.WriteLine("No customers found on queue.");
 
                 // Check if timer run a little bit last time = there was a customer
                 if (_SERVING_TIME.Elapsed.Milliseconds > 0)
@@ -743,14 +919,12 @@ namespace ServicingTerminalApplication
                     // Reset
                     _SERVING_TIME.Reset();
                 }
-                else
-                {
-
-                }
                 if (!_READ_COUNTER) {
                     //Check first if the Servicing App is holding a real customer to move him to the next one or not.
                     MoveCustomerToNextOrDelete(con);
                     Previous_Customer = No_Customer;
+                    Next_Customer = No_Customer;
+                    updateCustomerInfoShown(Clear_Customer);
                     z("Empty Customers.");
                 }
                 else
@@ -758,14 +932,11 @@ namespace ServicingTerminalApplication
                     // Customer found.
 
                     // Show the information of the customer.
-                    updateForm nuea = new updateForm();
-                    nuea.CQN = Next_Customer.Customer_Queue_Number.ToString();
-                    nuea.type = Next_Customer.Type;
-                    nuea.s_id = Next_Customer.Student_No;
-                    nuea.full_name = Next_Customer.Full_Name;
-                    nuea.transaction_type = getTransactionTypeName(Next_Customer.Transaction_Type);
+                    updateCustomerInfoShown(Next_Customer);
+                    /**
+                    * Disabled when removed currentCustomer (April 24, 2018)
                     fnf.OnFirstNameUpdated(nuea);
-
+                    **/
                     // Start time serving this customer
                     _SERVING_TIME.Start();
                     z("--> Serving Time is now running.");
@@ -782,10 +953,9 @@ namespace ServicingTerminalApplication
                     //}
                     //Update Queue_Info everytime next is clicked
                     SqlCommand Command4;
-                    String QUERY_update_QueueInfo = "update Queue_Info set Current_Number = Current_Number+1, Counter = @param_counter, Window = @param_window, Customer_Queue_Number = @param_cqn where Servicing_Office = @param_so";
+                    String QUERY_update_QueueInfo = "update Queue_Info set Current_Number = Current_Number+1, Window = @param_window, Customer_Queue_Number = @param_cqn where Servicing_Office = @param_so";
                     Command4 = new SqlCommand(QUERY_update_QueueInfo, con);
-
-                    Command4.Parameters.AddWithValue("@param_counter", PROGRAM_modeCounter);
+                    
                     Command4.Parameters.AddWithValue("@param_window", PROGRAM_window);
                     Command4.Parameters.AddWithValue("@param_so", PROGRAM_Servicing_Office);
                     Command4.Parameters.AddWithValue("@param_cqn", Next_Customer.Customer_Queue_Number);
@@ -804,14 +974,15 @@ namespace ServicingTerminalApplication
 
                     z("Updating Queue_Info when next is clicked finished!");
 
-                    Console.WriteLine(w_temp_run);
-                    w_temp_run = string.Empty;
+                    
                 }
                 
 
 
 
             }
+            Console.WriteLine(w_temp_run);
+            w_temp_run = string.Empty;
             con.Close();
 
 

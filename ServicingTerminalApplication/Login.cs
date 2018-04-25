@@ -131,7 +131,7 @@ namespace ServicingTerminalApplication
                     {
                         MessageBox.Show("Login Success", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         this.Hide();
-                        new OfficeConfirmation(_user_status,_user_id).Show();
+                        new Form1(_user_status, _user_id, 1).Show();
                     }
                     else
                     {
@@ -162,16 +162,7 @@ namespace ServicingTerminalApplication
                 button1_Click(this, new EventArgs());
             }
         }
-
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
-            pictureBox2.Focus();
-        }
-
-        private void pictureBox2_Click(object sender, EventArgs e)
-        {
-            ((PictureBox)sender).Focus();
-        }
+        
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {

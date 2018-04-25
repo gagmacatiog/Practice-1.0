@@ -16,7 +16,10 @@ namespace ServicingTerminalApplication
         public int ID { get; set; }
         public string Customer_Queue_Number { get; set; }
         public string Type { get; set; }
+        public string Customer_From { get; set; }
         public string Queue_Status { get; set; }
         public bool Transfer_Customer { get; set; } = false;
+        public int Pattern_Max { get;  set; }
+        public DateTime Time { get;  set; }
     }
 }
