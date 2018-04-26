@@ -30,7 +30,7 @@ namespace ServicingTerminalApplication
             }else
             {
                 this.Hide();
-                new Form1(user_type, user_id, window_value).Show();
+                new Form1( user_id, window_value).Show();
             }
         }
     }

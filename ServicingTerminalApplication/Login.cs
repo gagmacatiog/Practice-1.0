@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace ServicingTerminalApplication
     public partial class Login : Form
     {
         private String connection_string = System.Configuration.ConfigurationManager.ConnectionStrings["dbString"].ConnectionString;
-        private int _user_status = 0;
+        private bool _user_status = true;
         private int _user_id = 0;
         public Login()
         {
@@ -23,8 +24,18 @@ namespace ServicingTerminalApplication
             linkLabel1.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
             linkLabel2.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
             linkLabel3.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
+            macAddress();
         }
-
+        private void macAddress()
+        {
+            var macAddr = 
+                (
+                from nic in NetworkInterface.GetAllNetworkInterfaces()
+                where nic.OperationalStatus == OperationalStatus.Up
+                select nic.GetPhysicalAddress().ToString())
+                .FirstOrDefault();
+            MessageBox.Show("MAC address is "+macAddr);
+        }
         private void textBox_enter(object sender, EventArgs e)
         {
             TextBox field = ((TextBox)sender);
@@ -121,7 +132,7 @@ namespace ServicingTerminalApplication
                 {
                     IsExist = true;
                     Password = (string)reader["Password"];
-                    _user_status = (int)reader["Status"];
+                    _user_status = (Boolean)reader["Status"];
                     _user_id = (int)reader["id"];
                 }
                 con.Close();
@@ -131,7 +142,7 @@ namespace ServicingTerminalApplication
                     {
                         MessageBox.Show("Login Success", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         this.Hide();
-                        new Form1(_user_status, _user_id, 1).Show();
+                        new Form1( _user_id, 1).Show();
                     }
                     else
                     {

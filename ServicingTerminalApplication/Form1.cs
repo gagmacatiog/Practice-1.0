@@ -75,7 +75,7 @@ namespace ServicingTerminalApplication
 
         public List<_Main_Queue> LIST_Customers_On_Hold = new List<_Main_Queue>();
         #endregion
-        public Form1(int _a_user_type, int _a_user_id, int _a_user_window)
+        public Form1( int _a_user_id, int _a_user_window)
         {
             #region CONSTRUCTOR
             InitializeComponent();
@@ -100,7 +100,6 @@ namespace ServicingTerminalApplication
             Previous_Customer = No_Customer;
             Hold_Customer = No_Customer;
             setThisServicingOfficeName();
-            user_type = _a_user_type;
             user_id = _a_user_id;
             PROGRAM_window = _a_user_window;
             AddThisServicingTerminal();
@@ -763,8 +762,8 @@ namespace ServicingTerminalApplication
                     "where Servicing_Office = @param_so and Queue_Status = @param_qs and Customer_From = @param_cf order by Queue_Number asc";
                 String QUERY_mq_next_customer_update_on_success = "update Main_Queue set Queue_Status = @param_qs where id = @param_uniqueid";
                 //String QUERY_tq_next_customer_update_on_success = "update Transfer_Queue set Queue_Status = @param_qs where Main_Queue_ID = @param_uniqueid";
-                SqlCommand Command1,Command2,CommandQuickUpdate;
-                SqlDataReader Reader1,Reader2;
+                SqlCommand Command1,Command2,Command3,CommandQuickUpdate;
+                SqlDataReader Reader1,Reader2,Reader3;
                 Command1 = new SqlCommand();
                 Command1.Connection = con;
                 Command1.CommandType = CommandType.Text;
@@ -794,7 +793,7 @@ namespace ServicingTerminalApplication
                 while (Reader1.Read())
                 {
                     _READ_COUNTER = true;
-                    z("Customer found on main_queue");
+                    z("Customer found on Local (Normal)");
                     Console.WriteLine("?->" + Reader1["Customer_From"]);
                     Next_Customer = new _Main_Queue
                     {
@@ -814,13 +813,84 @@ namespace ServicingTerminalApplication
                     CommandQuickUpdate.Parameters.AddWithValue("@param_qs", "Serving");
                     CommandQuickUpdate.Parameters.AddWithValue("@param_uniqueid", (int)Reader1["id"]);
                     CommandQuickUpdate.ExecuteNonQuery();
-                    z("Setting the customer as \"Currently Serving\" finished.");
+                    Console.WriteLine("Customer is now " + Next_Customer.Customer_Queue_Number);
 
                 }
+                Console.WriteLine("////////////////////{0} {1}", _READ_COUNTER, PROGRAM_ServeMobileCustomer);
                 if (!_READ_COUNTER && PROGRAM_ServeMobileCustomer)
-                {   // If it did not received mobile customers because there were none on the Main_Queue,
+                {
+                    // If it did not received mobile customers because there were none on the Main_Queue,
                     // pick one from Local
+                    MessageBox.Show("No more mobile: getting locals instead.");
+                    Command2 = new SqlCommand(QUERY_next_customer_mq, con);
+                    Command2.Parameters.AddWithValue("@param_cf", 0); // 0 = Local
+                    Command2.Parameters.AddWithValue("@param_so", PROGRAM_Servicing_Office);
+                    Command2.Parameters.AddWithValue("@param_qs", "Waiting");
+                    Reader2 = Command2.ExecuteReader();
+                    while (Reader2.Read())
+                    {
+                        _READ_COUNTER = true;
+                        z("Customer found on Local (no more mobile)");
+                        Console.WriteLine("?->" + Reader2["Customer_From"]);
+                        Next_Customer = new _Main_Queue
+                        {
+                            Queue_Number = (int)Reader2["Queue_Number"],
+                            Full_Name = (string)Reader2["Full_Name"],
+                            Servicing_Office = (int)Reader2["Servicing_Office"],
+                            Transaction_Type = (int)Reader2["Transaction_Type"],
+                            Type = ((Boolean)Reader2["Type"] == false) ? "Student" : "Guest",
+                            Customer_From = ((Boolean)Reader2["Customer_From"] == false) ? "Local" : "Mobile",
+                            Customer_Queue_Number = (string)Reader2["Customer_Queue_Number"],
+                            ID = (int)Reader2["id"],
+                            Student_No = ((Boolean)Reader2["Type"] == false) ? (string)Reader2["Student_No"] : "N/A",
+                            Pattern_Current = (int)Reader2["Pattern_Current"],
+                            Transfer_Customer = false
+                        };
+                        CommandQuickUpdate = new SqlCommand(QUERY_mq_next_customer_update_on_success, con);
+                        CommandQuickUpdate.Parameters.AddWithValue("@param_qs", "Serving");
+                        CommandQuickUpdate.Parameters.AddWithValue("@param_uniqueid", (int)Reader2["id"]);
+                        CommandQuickUpdate.ExecuteNonQuery();
+                        Console.WriteLine("Customer is now " + Next_Customer.Customer_Queue_Number);
 
+                    }
+                    Command2.Dispose();
+                }
+                else if (!_READ_COUNTER && !PROGRAM_ServeMobileCustomer)
+                {
+                    // If it did not received local customers because there were none on the Main_Queue,
+                    // pick one from Mobile
+                    Command3 = new SqlCommand(QUERY_next_customer_online, con);
+                    Command3.Parameters.AddWithValue("@param_cf", 1);
+                    Command3.Parameters.AddWithValue("@param_so", PROGRAM_Servicing_Office);
+                    Command3.Parameters.AddWithValue("@param_qs", "Waiting");
+                    Reader3 = Command3.ExecuteReader();
+                    while (Reader3.Read())
+                    {
+                        _READ_COUNTER = true;
+                        z("Customer found on Mobile (no more local)");
+                        Console.WriteLine("?->" + Reader3["Customer_From"]);
+                        Next_Customer = new _Main_Queue
+                        {
+                            Queue_Number = (int)Reader3["Queue_Number"],
+                            Full_Name = (string)Reader3["Full_Name"],
+                            Servicing_Office = (int)Reader3["Servicing_Office"],
+                            Transaction_Type = (int)Reader3["Transaction_Type"],
+                            Type = ((Boolean)Reader3["Type"] == false) ? "Student" : "Guest",
+                            Customer_From = ((Boolean)Reader3["Customer_From"] == false) ? "Local" : "Mobile",
+                            Customer_Queue_Number = (string)Reader3["Customer_Queue_Number"],
+                            ID = (int)Reader3["id"],
+                            Student_No = ((Boolean)Reader3["Type"] == false) ? (string)Reader3["Student_No"] : "N/A",
+                            Pattern_Current = (int)Reader3["Pattern_Current"],
+                            Transfer_Customer = false
+                        };
+                        CommandQuickUpdate = new SqlCommand(QUERY_mq_next_customer_update_on_success, con);
+                        CommandQuickUpdate.Parameters.AddWithValue("@param_qs", "Serving");
+                        CommandQuickUpdate.Parameters.AddWithValue("@param_uniqueid", (int)Reader3["id"]);
+                        CommandQuickUpdate.ExecuteNonQuery();
+                        Console.WriteLine("Customer is now " + Next_Customer.Customer_Queue_Number);
+
+                    }
+                    Command3.Dispose();
                 }
                 //if (!_READ_COUNTER)
                 //{

@@ -176,8 +176,6 @@ namespace ServicingTerminalApplication
                     }
                 transaction.Commit();
                 con.Close();
-                if (sForm != null)
-                    sForm.generateDeleteItems();
                 MessageBox.Show("New Transaction Type added.","Success!" );
             }
             catch (SqlException ex) {

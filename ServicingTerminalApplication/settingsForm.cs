@@ -22,7 +22,6 @@ namespace ServicingTerminalApplication
         public settingsForm()
         {
             InitializeComponent();
-            generateDeleteItems();
         }
         private List<_Servicing_Office> LIST_getServicingOffices()
         {
@@ -118,20 +117,7 @@ namespace ServicingTerminalApplication
 
             return dataSource;
         }
-        public void generateDeleteItems()
-        {
-
-            comboBox1.DataSource = LIST_getServicingOffices();
-            comboBox2.DataSource = LIST_getTransactionType();
-            comboBox3.DataSource = LIST_getUsers();
-            comboBox1.DisplayMember = "Name";
-            comboBox1.ValueMember = "id";
-            comboBox2.DisplayMember = "Transaction_Name";
-            comboBox2.ValueMember = "id";
-            comboBox3.DisplayMember = "FullName";
-            comboBox3.ValueMember = "id";
-
-        }
+        
 
         private void settingsForm_Load(object sender, EventArgs e)
         {
@@ -313,169 +299,7 @@ namespace ServicingTerminalApplication
                 { MessageBox.Show("Old password should be 8 - 50 characters."); return false; }
             return true;
         }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            if (mainForm != null)
-                if (mainForm.user_type == 2)
-                {
-                    if (textBox1.TextLength < 100 && textBox1.TextLength >= 2 && textBox2.TextLength < 100)
-                    {
-                        // Add to database
-                        SqlConnection con = new SqlConnection(connection_string);
-                        string _query = "insert into Servicing_Office (Name,Address) " +
-                            "values (@param1,@param2)";
-                        SqlCommand _cmd = new SqlCommand(_query, con);
-                        try
-                        {
-                            con.Open();
-                            _cmd.Parameters.AddWithValue("@param1", textBox1.Text);
-                            _cmd.Parameters.AddWithValue("@param2", textBox2.Text);
-                            _cmd.ExecuteNonQuery();
-                            _cmd.Parameters.Clear();
-                            con.Close();
-                            generateDeleteItems();
-                            MessageBox.Show("Adding new Servicing Office done.", "Success!");
-                        }
-                        catch (SqlException ex)
-                        {
-                            MessageBox.Show("Database error. {0}" + ex.Message);
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("Name or address length exceeds the limit!");
-                    }
-                }
-                    
-        }
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-            if (mainForm != null)
-                if (mainForm.user_type == 2)
-                {
-                    if (form_tt == null)
-                    {
-                        form_tt = new addTransactionType();
-                    }
-
-                    form_tt.ShowDialog();
-                }
-                    
-        }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            if (mainForm != null)
-                if (mainForm.user_type == 2)
-                {
-                    SqlConnection con = new SqlConnection(connection_string);
-                    string SERVICINGOFFICE_Delete = "delete from Servicing_Office where id = @param1";
-                    SqlCommand _cmd = new SqlCommand(SERVICINGOFFICE_Delete, con);
-
-                    var confirmResult = MessageBox.Show("Are you sure to delete this?",
-                                             "Confirm Delete",
-                                             MessageBoxButtons.YesNo);
-                    if (confirmResult == DialogResult.Yes)
-                    {
-                        // If 'Yes', do something here.
-                        try
-                        {
-                            con.Open();
-                            _cmd.Parameters.AddWithValue("@param1", comboBox1.SelectedValue);
-                            _cmd.ExecuteNonQuery();
-                            con.Close();
-                        }
-                        catch (SqlException ex)
-                        {
-                            MessageBox.Show("Error ->" + ex.Message);
-                        }
-                    }
-                    else
-                    {
-                        // If 'No', do something here.
-                    }
-                    generateDeleteItems();
-                }
-                    
-        }
-
-        private void button5_Click(object sender, EventArgs e)
-        {
-            if (mainForm != null)
-                if (mainForm.user_type == 2)
-                {
-                    SqlConnection con = new SqlConnection(connection_string);
-                    string TRANSACTION_Delete = "delete from Transaction_Type where id = @param1";
-                    SqlCommand _cmd = new SqlCommand(TRANSACTION_Delete, con);
-
-                    var confirmResult = MessageBox.Show("Are you sure to delete this?",
-                                             "Confirm Delete",
-                                             MessageBoxButtons.YesNo);
-                    if (confirmResult == DialogResult.Yes)
-                    {
-                        // If 'Yes', do something here.
-                        try
-                        {
-                            con.Open();
-                            _cmd.Parameters.AddWithValue("@param1", comboBox2.SelectedValue);
-                            _cmd.ExecuteNonQuery();
-                            con.Close();
-                        }
-                        catch (SqlException ex)
-                        {
-                            MessageBox.Show("Error ->" + ex.Message);
-                        }
-                    }
-                    else
-                    {
-                        // If 'No', do something here.
-                    }
-                    generateDeleteItems();
-
-                }
-                    
-        }
-
-        private void button6_Click(object sender, EventArgs e)
-        {
-            if (mainForm != null)
-                if (mainForm.user_type == 2)
-                {
-                    SqlConnection con = new SqlConnection(connection_string);
-                    string USERS_Delete = "delete from Users where id = @param1";
-                    SqlCommand _cmd = new SqlCommand(USERS_Delete, con);
-
-                    var confirmResult = MessageBox.Show("Are you sure to delete this?",
-                                             "Confirm Delete",
-                                             MessageBoxButtons.YesNo);
-                    if (confirmResult == DialogResult.Yes)
-                    {
-                        // If 'Yes', do something here.
-                        try
-                        {
-                            con.Open();
-                            _cmd.Parameters.AddWithValue("@param1", comboBox3.SelectedValue);
-                            _cmd.ExecuteNonQuery();
-                            con.Close();
-                        }
-                        catch (SqlException ex)
-                        {
-                            MessageBox.Show("Error ->" + ex.Message);
-                        }
-                    }
-                    else
-                    {
-                        // If 'No', do something here.
-                    }
-                    generateDeleteItems();
-                }
-                else
-                {
-                    MessageBox.Show("Not authorized.", "Error");
-                }
-        }
+        
         
     }
 }
