@@ -18,23 +18,43 @@ namespace ServicingTerminalApplication
         private String connection_string = System.Configuration.ConfigurationManager.ConnectionStrings["dbString"].ConnectionString;
         private bool _user_status = true;
         private int _user_id = 0;
+        public int _window = 0;
         public Login()
         {
             InitializeComponent();
             linkLabel1.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
             linkLabel2.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
             linkLabel3.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
-            macAddress();
+            CheckIfThisWindowAllowed();
         }
-        private void macAddress()
+        private void CheckIfThisWindowAllowed()
         {
+            bool allowed = false;
             var macAddr = 
                 (
                 from nic in NetworkInterface.GetAllNetworkInterfaces()
                 where nic.OperationalStatus == OperationalStatus.Up
                 select nic.GetPhysicalAddress().ToString())
                 .FirstOrDefault();
-            MessageBox.Show("MAC address is "+macAddr);
+            SqlConnection con = new SqlConnection(connection_string);
+            string query = "select * from Set_Windows where MAC_Address = @param1";
+            SqlDataReader rdr;
+            SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@param1", macAddr);
+            con.Open();
+            rdr = cmd.ExecuteReader();
+            while (rdr.Read())
+            {
+                _window = (int)rdr["Window"];
+                allowed = true;
+            }
+            con.Close();
+            MessageBox.Show("select * from Set_Windows where MAC_Address = " + macAddr);
+            if (!allowed)
+            {
+                MessageBox.Show("This window is not set up yet. Please contact an administrator.","Unknown Instance?");
+                Environment.Exit(0);
+            }
         }
         private void textBox_enter(object sender, EventArgs e)
         {
@@ -142,7 +162,7 @@ namespace ServicingTerminalApplication
                     {
                         MessageBox.Show("Login Success", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         this.Hide();
-                        new Form1( _user_id, 1).Show();
+                        new Form1( _user_id, _window).Show();
                     }
                     else
                     {
