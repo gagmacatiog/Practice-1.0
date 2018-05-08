@@ -49,10 +49,10 @@ namespace ServicingTerminalApplication
                 allowed = true;
             }
             con.Close();
-            MessageBox.Show("select * from Set_Windows where MAC_Address = " + macAddr);
+            //MessageBox.Show("select * from Set_Windows where MAC_Address = " + macAddr);
             if (!allowed)
             {
-                MessageBox.Show("This window is not set up yet. Please contact an administrator.","Unknown Instance?");
+                MessageBox.Show("This window is not set up yet. Please contact an administrator.","Unknown Instance");
                 Environment.Exit(0);
             }
         }
