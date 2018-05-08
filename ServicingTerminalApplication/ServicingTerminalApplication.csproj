@@ -319,6 +319,13 @@
   <ItemGroup>
     <Content Include="Resources\createAccout-final.png" />
     <Content Include="Resources\createAccout-final1.png" />
+    <None Include="Resources\deleteBtn.png" />
+    <None Include="Resources\nextBtn.png" />
+    <None Include="Resources\put.png" />
+    <None Include="Resources\list3.png" />
+    <None Include="Resources\Settings.png" />
+    <None Include="Resources\settings.bmp" />
+    <None Include="Resources\Settings2.png" />
     <None Include="Resources\editBtn_pressed.png" />
     <None Include="Resources\editBtn.png" />
     <None Include="Resources\outBtn_pressed.png" />
@@ -326,9 +333,7 @@
     <None Include="Resources\helpBtn_pressed.png" />
     <None Include="Resources\helpBtn.png" />
     <None Include="Resources\nextBtn_pressed.png" />
-    <None Include="Resources\nextBtn.png" />
     <None Include="Resources\deleteBtn_pressed.png" />
-    <None Include="Resources\deleteBtn.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

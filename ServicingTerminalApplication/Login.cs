@@ -19,6 +19,8 @@ namespace ServicingTerminalApplication
         private bool _user_status = true;
         private int _user_id = 0;
         public int _window = 0;
+        public int _servicing_office_id = 0;
+        public string _servicing_office_name = "Unknown";
         public Login()
         {
             InitializeComponent();
@@ -46,10 +48,12 @@ namespace ServicingTerminalApplication
             while (rdr.Read())
             {
                 _window = (int)rdr["Window"];
+                _servicing_office_id = (int)rdr["Servicing_Office_ID"];
+                _servicing_office_name = (string)rdr["Name"];
                 allowed = true;
             }
             con.Close();
-            //MessageBox.Show("select * from Set_Windows where MAC_Address = " + macAddr);
+            // MessageBox.Show("select * from Set_Windows where MAC_Address = " + macAddr);
             if (!allowed)
             {
                 MessageBox.Show("This window is not set up yet. Please contact an administrator.","Unknown Instance");
@@ -162,7 +166,7 @@ namespace ServicingTerminalApplication
                     {
                         MessageBox.Show("Login Success", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         this.Hide();
-                        new Form1( _user_id, _window).Show();
+                        new Form1( _user_id, _window, _servicing_office_id,_servicing_office_name).Show();
                     }
                     else
                     {

@@ -75,14 +75,13 @@ namespace ServicingTerminalApplication
 
         public List<_Main_Queue> LIST_Customers_On_Hold = new List<_Main_Queue>();
         #endregion
-        public Form1( int _a_user_id, int _a_user_window)
+        public Form1( int _a_user_id, int _a_user_window, int _a_servicing_office_id, string _a_servicing_office_name)
         {
             #region CONSTRUCTOR
             InitializeComponent();
             Rectangle workingArea = Screen.GetWorkingArea(this);
             this.Location = new Point(workingArea.Right - Size.Width,
                                       workingArea.Bottom - Size.Height);
-            this.TopMost = true;
             /**
              * Disabled when removed currentCustomer (April 24, 2018)
             fnf.FirstNameUpdated += Fnf_FirstNameUpdated;
@@ -99,11 +98,15 @@ namespace ServicingTerminalApplication
             w_temp_run += "@ 0All Datatables have been generated.";
             Previous_Customer = No_Customer;
             Hold_Customer = No_Customer;
-            setThisServicingOfficeName();
+            //setThisServicingOfficeName();
             user_id = _a_user_id;
             PROGRAM_window = _a_user_window;
+            PROGRAM_Servicing_Office = _a_servicing_office_id;
+            PROGRAM_Servicing_Office_Name = _a_servicing_office_name;
             AddThisServicingTerminal();
             RefreshHoldList();
+            MessageBox.Show("You are currently serving "+PROGRAM_Servicing_Office_Name+" at Window " + PROGRAM_window.ToString()+"!"
+                ,"Notice");
             #endregion
         }
         #region METHODS
@@ -117,6 +120,9 @@ namespace ServicingTerminalApplication
         }
         private void RefreshHoldList()
         {
+            
+
+
             LIST_Customers_On_Hold.Clear();
             SqlConnection con = new SqlConnection(connection_string);
             con.Open();
@@ -147,18 +153,18 @@ namespace ServicingTerminalApplication
             }
             con.Close();
         }
-        private void setThisServicingOfficeName()
-        {
-            foreach (DataRow row in table_Servicing_Office.Rows)
-            {
-                int temp_id = (int)row["ID"];
-                if (temp_id == PROGRAM_Servicing_Office)
-                {
-                    PROGRAM_Servicing_Office_Name = (string)row["Name"];
-                    break;
-                }
-            }
-        }
+        //private void setThisServicingOfficeName()
+        //{
+        //    foreach (DataRow row in table_Servicing_Office.Rows)
+        //    {
+        //        int temp_id = (int)row["ID"];
+        //        if (temp_id == PROGRAM_Servicing_Office)
+        //        {
+        //            PROGRAM_Servicing_Office_Name = (string)row["Name"];
+        //            break;
+        //        }
+        //    }
+        //}
         private void AddThisServicingTerminal()
         {
             SqlConnection con = new SqlConnection(connection_string);
@@ -582,10 +588,6 @@ namespace ServicingTerminalApplication
             }
         }
         **/
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
         protected override void WndProc(ref Message m)
         {
             switch (m.Msg)
@@ -614,14 +616,14 @@ namespace ServicingTerminalApplication
         }
         private void onMouseClick(object sender, EventArgs e)
         {
-            if (((PictureBox)sender) == pictureBoxNEXT)
+            if (((Button)sender) == pictureBoxNEXT)
             {
                 // If next button is clicked
                 Console.WriteLine(" START ------------------- NEXT --------------------");
                 Next();
                 Console.WriteLine(" END ------------------- NEXT --------------------");
             }
-            else if (((PictureBox)sender) == pictureBoxDELETE)
+            else if (((Button)sender) == pictureBoxDELETE)
             {
                 // If delete button is clicked
                 // Delete the customer
@@ -661,14 +663,14 @@ namespace ServicingTerminalApplication
                 }
                 Console.WriteLine(" END ------------------- DELETE --------------------");
             }
-            else if (((PictureBox)sender) == pictureBoxHOLD)
+            else if (((Button)sender) == pictureBoxHOLD)
             {
 
                 Console.WriteLine(" START ------------------- HOLD --------------------");
                 HoldThisCustomer();
                 Console.WriteLine(" END ------------------- HOLD --------------------");
             }
-            else if (((PictureBox)sender) == pictureBoxViewHold)
+            else if (((Button)sender) == pictureBoxViewHold)
             {
 
                 Console.WriteLine(" START ------------------- HOLD-FORM --------------------");
@@ -687,25 +689,25 @@ namespace ServicingTerminalApplication
 
         private void onHover(object sender, EventArgs e)
         {
-            if(((PictureBox)sender) == pictureBoxHOLD)
+            if(((Button)sender) == pictureBoxNEXT)
             {
-                ((PictureBox)sender).Image = ServicingTerminalApplication.Properties.Resources.nextBtn_pressed;
+                ((Button)sender).Image = ServicingTerminalApplication.Properties.Resources.nextBtn_pressed;
             }
             else
             {
-                ((PictureBox)sender).Image = ServicingTerminalApplication.Properties.Resources.deleteBtn_pressed;
+                ((Button)sender).Image = ServicingTerminalApplication.Properties.Resources.deleteBtn_pressed;
             }
         }
 
         private void onMouseLeave(object sender, EventArgs e)
         {
-            if (((PictureBox)sender) == pictureBoxHOLD)
+            if (((Button)sender) == pictureBoxNEXT)
             {
-                ((PictureBox)sender).Image = ServicingTerminalApplication.Properties.Resources.nextBtn;
+                ((Button)sender).Image = ServicingTerminalApplication.Properties.Resources.nextBtn;
             }
             else
             {
-                ((PictureBox)sender).Image = ServicingTerminalApplication.Properties.Resources.deleteBtn;
+                ((Button)sender).Image = ServicingTerminalApplication.Properties.Resources.deleteBtn;
             }
         }
         #endregion

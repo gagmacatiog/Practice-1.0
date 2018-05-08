@@ -21,17 +21,17 @@ namespace ServicingTerminalApplication
             this.user_id = _a_user_id;
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            int window_value = (int)numericUpDown1.Value;
-            if(window_value == 0)
-            {
-                MessageBox.Show("Fill the window field!", "Invalid value.", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            }else
-            {
-                this.Hide();
-                new Form1( user_id, window_value).Show();
-            }
-        }
+        //private void button1_Click(object sender, EventArgs e)
+        //{
+        //    int window_value = (int)numericUpDown1.Value;
+        //    if(window_value == 0)
+        //    {
+        //        MessageBox.Show("Fill the window field!", "Invalid value.", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+        //    }else
+        //    {
+        //        this.Hide();
+        //        new Form1( user_id, window_value).Show();
+        //    }
+        //}
     }
 }
