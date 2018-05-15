@@ -60,6 +60,11 @@ namespace ServicingTerminalApplication
             finally { Console.Write("Delete finished."); }
 
         }
+        public async Task User_SetToInactive(string key)
+        {
+            string m = "Queue_Status/" + key;
+            await firebase.Child(m).PutAsync<string>("Inactive");
+        }
         public async Task App_Delete_QueueTransaction(string ID_Pattern) {
             string node = "Queue_Transaction/";
             Console.WriteLine("Deleting on -> Queue_Transacation");

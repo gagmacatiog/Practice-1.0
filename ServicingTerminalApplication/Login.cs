@@ -25,8 +25,6 @@ namespace ServicingTerminalApplication
         {
             InitializeComponent();
             linkLabel1.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
-            linkLabel2.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
-            linkLabel3.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
             CheckIfThisWindowAllowed();
         }
         private void CheckIfThisWindowAllowed()

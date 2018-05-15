@@ -1,5 +1,6 @@
 ﻿using Firebase.Auth;
 using Firebase.Auth.Payloads;
+using Firebase.Database;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -1079,6 +1080,13 @@ namespace ServicingTerminalApplication
                     z("Deleting from Table: Main_Queue with id of " + Previous_Customer.ID);
                     z("Customer id#" + Previous_Customer.ID + " deleted!");
                     deleteCommand.ExecuteNonQuery();
+                    if (Previous_Customer.Type == "Student")
+                        try
+                        {
+                            firebase_Connection fcon = new firebase_Connection();
+                            fcon.User_SetToInactive(Previous_Customer.Student_No);
+                        }
+                        catch (FirebaseException) { }
                     z("Real customer is deleted.");
                 }
                 else { z("Previous customer is a null."); z("NULL Customer is ignored. Nothing is deleted"); }
@@ -1087,11 +1095,15 @@ namespace ServicingTerminalApplication
             {
                 //Transfer the Customer to the next Servicing Office
                 //Change the values of the served Customer at Main_Queue
-                SqlCommand Command6;
+                SqlCommand Command6,Command7;
                 //Next line -> Update Table: Main Queue of Previous Customer
                 //Sending #customer to the next Servicing Office
                 String QUERY_update_MainQueue_onNext = "update Main_Queue set Queue_Number = @param_qn, Servicing_Office = @param_so, Pattern_Current = Pattern_Current + 1, Queue_Status = @param_qs where id = @param_unique_id";
                 Command6 = new SqlCommand(QUERY_update_MainQueue_onNext, con);
+                String QUERY_create_RatingOffice_onNext = "insert into Rating_Office (Customer_Queue_Number,isStudent,Score,isGiven,Transaction_ID,Servicing_Office) " +
+                    " values " +
+                    " (@param_CQN,@param_isStudent,0,0,@param_tt_ID,@param_so)";
+                Command7 = new SqlCommand(QUERY_create_RatingOffice_onNext);
                 //Get the Queue_Number from the tip of Table:Queue_Info -> Current_Queue
                 int TEMP_getCustomerQueueNumberOnNext = getQueueCurrentQueue(_NEXT_Servicing_Office, con);
                 //Declare parameters
@@ -1100,12 +1112,17 @@ namespace ServicingTerminalApplication
                 Command6.Parameters.AddWithValue("@param_unique_id", Previous_Customer.ID);
                 Command6.Parameters.AddWithValue("@param_qs", "Waiting");
                 z("The update Main_Queue for moving a customer run with the following values:");
+                Command7.Parameters.AddWithValue("@param_CQN", Previous_Customer.Customer_Queue_Number);
+                Command7.Parameters.AddWithValue("@param_isStudent", (Previous_Customer.Type == "Guest") ? false : true);
+                Command7.Parameters.AddWithValue("@param_tt_ID", Previous_Customer.Transaction_Type);
+                Command7.Parameters.AddWithValue("@param_so", _NEXT_Servicing_Office);
                 z("Queue Number : " + TEMP_getCustomerQueueNumberOnNext);
                 z("Servicing Office : " + _NEXT_Servicing_Office);
                 z("Unique id of : " + Previous_Customer.ID);
                 z("Pattern Number is :" + Previous_Customer.Pattern_Current);
                 //Execute Commands
                 Command6.ExecuteNonQuery();
+                Command7.ExecuteNonQuery();
                 //Increment the Previous_Customer 
 
                 z("Main_Queue and Queue_Info updated since next SO is found.");

@@ -22,6 +22,7 @@ namespace ServicingTerminalApplication
         public settingsForm()
         {
             InitializeComponent();
+            TopMost = true;
         }
         private List<_Servicing_Office> LIST_getServicingOffices()
         {

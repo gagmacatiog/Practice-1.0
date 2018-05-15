@@ -19,7 +19,12 @@ namespace ServicingTerminalApplication
 
         public FormHoldCustomers(List<_Main_Queue> new_List)
         {
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            StartPosition = FormStartPosition.CenterScreen;
             InitializeComponent();
+            TopMost = true;
             LIST_Customers_On_Hold = new_List;
             listBox1.DataSource = LIST_Customers_On_Hold;
             listBox1.DisplayMember = "Full_Name";
