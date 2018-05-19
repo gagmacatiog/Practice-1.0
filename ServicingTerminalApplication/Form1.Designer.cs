@@ -41,6 +41,8 @@
             this.pictureBoxViewHold = new System.Windows.Forms.Button();
             this.info_background = new System.Windows.Forms.PictureBox();
             this.button1 = new System.Windows.Forms.Button();
+            this.pictureBoxStop = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.info_background)).BeginInit();
             this.SuspendLayout();
@@ -49,18 +51,20 @@
             // 
             this.panel1.BackColor = System.Drawing.SystemColors.Control;
             this.panel1.Controls.Add(this.textCQN);
-            this.panel1.Location = new System.Drawing.Point(40, 25);
+            this.panel1.Location = new System.Drawing.Point(53, 31);
+            this.panel1.Margin = new System.Windows.Forms.Padding(4);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(193, 136);
+            this.panel1.Size = new System.Drawing.Size(257, 167);
             this.panel1.TabIndex = 5;
             // 
             // textCQN
             // 
             this.textCQN.Font = new System.Drawing.Font("Bernard MT Condensed", 25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textCQN.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.textCQN.Location = new System.Drawing.Point(13, 14);
+            this.textCQN.Location = new System.Drawing.Point(17, 17);
+            this.textCQN.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.textCQN.Name = "textCQN";
-            this.textCQN.Size = new System.Drawing.Size(167, 107);
+            this.textCQN.Size = new System.Drawing.Size(223, 132);
             this.textCQN.TabIndex = 5;
             this.textCQN.Text = "-";
             this.textCQN.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -69,10 +73,11 @@
             // 
             this.textType.Cursor = System.Windows.Forms.Cursors.Default;
             this.textType.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textType.Location = new System.Drawing.Point(239, 137);
+            this.textType.Location = new System.Drawing.Point(319, 169);
+            this.textType.Margin = new System.Windows.Forms.Padding(4);
             this.textType.Name = "textType";
             this.textType.ReadOnly = true;
-            this.textType.Size = new System.Drawing.Size(284, 24);
+            this.textType.Size = new System.Drawing.Size(377, 29);
             this.textType.TabIndex = 9;
             this.textType.TabStop = false;
             this.textType.Text = "-----";
@@ -81,11 +86,12 @@
             // 
             this.textTransaction.Cursor = System.Windows.Forms.Cursors.Default;
             this.textTransaction.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textTransaction.Location = new System.Drawing.Point(239, 85);
+            this.textTransaction.Location = new System.Drawing.Point(319, 105);
+            this.textTransaction.Margin = new System.Windows.Forms.Padding(4);
             this.textTransaction.Multiline = true;
             this.textTransaction.Name = "textTransaction";
             this.textTransaction.ReadOnly = true;
-            this.textTransaction.Size = new System.Drawing.Size(284, 45);
+            this.textTransaction.Size = new System.Drawing.Size(377, 54);
             this.textTransaction.TabIndex = 8;
             this.textTransaction.TabStop = false;
             this.textTransaction.Text = "-----";
@@ -94,10 +100,11 @@
             // 
             this.textName.Cursor = System.Windows.Forms.Cursors.Default;
             this.textName.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textName.Location = new System.Drawing.Point(239, 55);
+            this.textName.Location = new System.Drawing.Point(319, 68);
+            this.textName.Margin = new System.Windows.Forms.Padding(4);
             this.textName.Name = "textName";
             this.textName.ReadOnly = true;
-            this.textName.Size = new System.Drawing.Size(284, 24);
+            this.textName.Size = new System.Drawing.Size(377, 29);
             this.textName.TabIndex = 7;
             this.textName.TabStop = false;
             this.textName.Text = "Name";
@@ -106,11 +113,12 @@
             // 
             this.textID.Cursor = System.Windows.Forms.Cursors.Default;
             this.textID.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textID.Location = new System.Drawing.Point(239, 25);
+            this.textID.Location = new System.Drawing.Point(319, 31);
+            this.textID.Margin = new System.Windows.Forms.Padding(4);
             this.textID.Name = "textID";
             this.textID.ReadOnly = true;
             this.textID.ShortcutsEnabled = false;
-            this.textID.Size = new System.Drawing.Size(284, 24);
+            this.textID.Size = new System.Drawing.Size(377, 29);
             this.textID.TabIndex = 6;
             this.textID.TabStop = false;
             this.textID.Text = "ID # ";
@@ -124,9 +132,10 @@
             this.pictureBoxNEXT.ForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.pictureBoxNEXT.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxNEXT.Image")));
             this.pictureBoxNEXT.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.pictureBoxNEXT.Location = new System.Drawing.Point(67, 183);
+            this.pictureBoxNEXT.Location = new System.Drawing.Point(0, 227);
+            this.pictureBoxNEXT.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBoxNEXT.Name = "pictureBoxNEXT";
-            this.pictureBoxNEXT.Size = new System.Drawing.Size(78, 61);
+            this.pictureBoxNEXT.Size = new System.Drawing.Size(104, 75);
             this.pictureBoxNEXT.TabIndex = 14;
             this.pictureBoxNEXT.Text = "Next";
             this.pictureBoxNEXT.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -142,9 +151,10 @@
             this.pictureBoxDELETE.ForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.pictureBoxDELETE.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxDELETE.Image")));
             this.pictureBoxDELETE.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.pictureBoxDELETE.Location = new System.Drawing.Point(151, 183);
+            this.pictureBoxDELETE.Location = new System.Drawing.Point(102, 228);
+            this.pictureBoxDELETE.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBoxDELETE.Name = "pictureBoxDELETE";
-            this.pictureBoxDELETE.Size = new System.Drawing.Size(78, 61);
+            this.pictureBoxDELETE.Size = new System.Drawing.Size(104, 75);
             this.pictureBoxDELETE.TabIndex = 13;
             this.pictureBoxDELETE.Text = "Delete";
             this.pictureBoxDELETE.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -160,9 +170,10 @@
             this.pictureBoxHOLD.ForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.pictureBoxHOLD.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxHOLD.Image")));
             this.pictureBoxHOLD.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.pictureBoxHOLD.Location = new System.Drawing.Point(235, 183);
+            this.pictureBoxHOLD.Location = new System.Drawing.Point(214, 226);
+            this.pictureBoxHOLD.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBoxHOLD.Name = "pictureBoxHOLD";
-            this.pictureBoxHOLD.Size = new System.Drawing.Size(78, 61);
+            this.pictureBoxHOLD.Size = new System.Drawing.Size(104, 75);
             this.pictureBoxHOLD.TabIndex = 12;
             this.pictureBoxHOLD.Text = "On Hold";
             this.pictureBoxHOLD.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -178,9 +189,10 @@
             this.pictureBoxViewHold.ForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.pictureBoxViewHold.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxViewHold.Image")));
             this.pictureBoxViewHold.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.pictureBoxViewHold.Location = new System.Drawing.Point(319, 183);
+            this.pictureBoxViewHold.Location = new System.Drawing.Point(326, 225);
+            this.pictureBoxViewHold.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBoxViewHold.Name = "pictureBoxViewHold";
-            this.pictureBoxViewHold.Size = new System.Drawing.Size(78, 61);
+            this.pictureBoxViewHold.Size = new System.Drawing.Size(104, 75);
             this.pictureBoxViewHold.TabIndex = 11;
             this.pictureBoxViewHold.Text = "Hold List";
             this.pictureBoxViewHold.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -192,9 +204,9 @@
             this.info_background.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(62)))), ((int)(((byte)(127)))));
             this.info_background.Dock = System.Windows.Forms.DockStyle.Top;
             this.info_background.Location = new System.Drawing.Point(0, 0);
-            this.info_background.Margin = new System.Windows.Forms.Padding(2);
+            this.info_background.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.info_background.Name = "info_background";
-            this.info_background.Size = new System.Drawing.Size(562, 178);
+            this.info_background.Size = new System.Drawing.Size(749, 219);
             this.info_background.TabIndex = 4;
             this.info_background.TabStop = false;
             // 
@@ -208,22 +220,63 @@
             this.button1.ForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.button1.Image = ((System.Drawing.Image)(resources.GetObject("button1.Image")));
             this.button1.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.button1.Location = new System.Drawing.Point(403, 182);
+            this.button1.Location = new System.Drawing.Point(539, 225);
+            this.button1.Margin = new System.Windows.Forms.Padding(4);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(78, 61);
+            this.button1.Size = new System.Drawing.Size(104, 75);
             this.button1.TabIndex = 2;
             this.button1.Text = "Settings";
             this.button1.TextAlign = System.Drawing.ContentAlignment.BottomRight;
             this.button1.UseVisualStyleBackColor = false;
             this.button1.Click += new System.EventHandler(this.button1_Click_1);
             // 
+            // pictureBoxStop
+            // 
+            this.pictureBoxStop.BackColor = System.Drawing.Color.Transparent;
+            this.pictureBoxStop.FlatAppearance.BorderSize = 0;
+            this.pictureBoxStop.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.pictureBoxStop.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
+            this.pictureBoxStop.ForeColor = System.Drawing.SystemColors.InactiveCaptionText;
+            this.pictureBoxStop.Image = global::ServicingTerminalApplication.Properties.Resources.STOP;
+            this.pictureBoxStop.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.pictureBoxStop.Location = new System.Drawing.Point(438, 225);
+            this.pictureBoxStop.Margin = new System.Windows.Forms.Padding(4);
+            this.pictureBoxStop.Name = "pictureBoxStop";
+            this.pictureBoxStop.Size = new System.Drawing.Size(104, 75);
+            this.pictureBoxStop.TabIndex = 15;
+            this.pictureBoxStop.Text = "Stop";
+            this.pictureBoxStop.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.pictureBoxStop.UseVisualStyleBackColor = false;
+            this.pictureBoxStop.Click += new System.EventHandler(this.pictureBoxStop_Click);
+            // 
+            // button2
+            // 
+            this.button2.BackColor = System.Drawing.Color.Transparent;
+            this.button2.FlatAppearance.BorderSize = 0;
+            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
+            this.button2.ForeColor = System.Drawing.SystemColors.InactiveCaptionText;
+            this.button2.Image = global::ServicingTerminalApplication.Properties.Resources.logoutBtn;
+            this.button2.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.button2.Location = new System.Drawing.Point(645, 225);
+            this.button2.Margin = new System.Windows.Forms.Padding(4);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(104, 75);
+            this.button2.TabIndex = 16;
+            this.button2.Text = "Logout";
+            this.button2.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.button2.UseVisualStyleBackColor = false;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(562, 256);
+            this.ClientSize = new System.Drawing.Size(749, 315);
+            this.Controls.Add(this.button2);
+            this.Controls.Add(this.pictureBoxStop);
             this.Controls.Add(this.pictureBoxNEXT);
             this.Controls.Add(this.pictureBoxDELETE);
             this.Controls.Add(this.pictureBoxHOLD);
@@ -236,6 +289,7 @@
             this.Controls.Add(this.info_background);
             this.Controls.Add(this.button1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Form1";
@@ -243,6 +297,7 @@
             this.Text = "Terminal Controller";
             this.TopMost = true;
             this.TransparencyKey = System.Drawing.Color.DarkRed;
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.info_background)).EndInit();
             this.ResumeLayout(false);
@@ -263,6 +318,8 @@
         private System.Windows.Forms.Button pictureBoxHOLD;
         private System.Windows.Forms.Button pictureBoxDELETE;
         private System.Windows.Forms.Button pictureBoxNEXT;
+        private System.Windows.Forms.Button pictureBoxStop;
+        private System.Windows.Forms.Button button2;
     }
 }
 

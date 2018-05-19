@@ -208,12 +208,6 @@
     <Compile Include="Login.Designer.cs">
       <DependentUpon>Login.cs</DependentUpon>
     </Compile>
-    <Compile Include="OfficeConfirmation.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="OfficeConfirmation.Designer.cs">
-      <DependentUpon>OfficeConfirmation.cs</DependentUpon>
-    </Compile>
     <Compile Include="settingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -265,9 +259,6 @@
     <EmbeddedResource Include="Login.resx">
       <DependentUpon>Login.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="OfficeConfirmation.resx">
-      <DependentUpon>OfficeConfirmation.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -293,7 +284,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
@@ -319,6 +312,8 @@
   <ItemGroup>
     <Content Include="Resources\createAccout-final.png" />
     <Content Include="Resources\createAccout-final1.png" />
+    <None Include="Resources\logoutBtn.png" />
+    <None Include="Resources\STOP.png" />
     <None Include="Resources\deleteBtn.png" />
     <None Include="Resources\nextBtn.png" />
     <None Include="Resources\put.png" />

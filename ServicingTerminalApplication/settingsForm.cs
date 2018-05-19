@@ -125,59 +125,30 @@ namespace ServicingTerminalApplication
 
         }
 
-        private void onMouseClick(object sender, EventArgs e)
-        {
-            if (((PictureBox)sender) == pictureBox1)
-            {
-                var confirmResult = MessageBox.Show("Are you sure to log out?",
-                                     "Confirm Logout",
-                                     MessageBoxButtons.YesNo);
-                if (confirmResult == DialogResult.Yes)
-                {
-                    // If 'Yes', do something here.
-                    new Login().Show();
-                    this.Hide();
-                    if (mainForm != null)
-                        mainForm.Close();
-                    if (customerForm != null)
-                        customerForm.Close();
-                }
-                else
-                {
-                    // If 'No', do something here.
-                }
-                
-            }
-        }
+       
 
         private void onHover(object sender, EventArgs e)
         {
-            if (((PictureBox)sender) == pictureBox1)
-            {
-                ((PictureBox)sender).Image = ServicingTerminalApplication.Properties.Resources.outBtn_pressed;
-            }
-            else if(((PictureBox)sender) == pictureBox2)
-            {
-                ((PictureBox)sender).Image = ServicingTerminalApplication.Properties.Resources.helpBtn_pressed;
-            }else
-            {
+            //if (((PictureBox)sender) == pictureBox1)
+            //{
+            //    ((PictureBox)sender).Image = ServicingTerminalApplication.Properties.Resources.outBtn_pressed;
+            //}
+            //else
+            //{
                 ((PictureBox)sender).Image = ServicingTerminalApplication.Properties.Resources.editBtn_pressed;
-            }
+            //}
         }
 
         private void onMouseLeave(object sender, EventArgs e)
         {
-            if (((PictureBox)sender) == pictureBox1)
-            {
-                ((PictureBox)sender).Image = ServicingTerminalApplication.Properties.Resources.outBtn;
-            }
-            else if(((PictureBox)sender) == pictureBox2)
-            {
-                ((PictureBox)sender).Image = ServicingTerminalApplication.Properties.Resources.helpBtn;
-            }else
-            {
+            //if (((PictureBox)sender) == pictureBox1)
+            //{
+            //    ((PictureBox)sender).Image = ServicingTerminalApplication.Properties.Resources.outBtn;
+            //}
+            //else
+            //{
                 ((PictureBox)sender).Image = ServicingTerminalApplication.Properties.Resources.editBtn;
-            }
+            //}
         }
 
         private void pictureBox3_Click(object sender, EventArgs e)

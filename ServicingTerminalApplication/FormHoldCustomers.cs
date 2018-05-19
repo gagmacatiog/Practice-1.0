@@ -45,9 +45,10 @@ namespace ServicingTerminalApplication
                 cmd.Parameters.AddWithValue("@paramcqn", selected.Customer_Queue_Number);
                 con.Open();
                 cmd.ExecuteNonQuery();
-                con.Close();
+                selected.Queue_Status = "Serving";
+                mainForm.ServeHold(selected);
                 mainForm.updateCustomerInfoShown(selected);
-                mainForm.Next();
+                con.Close();
                 Console.WriteLine("Now serving customer " + selected.Full_Name);
                 Close();
             }

@@ -24,37 +24,45 @@ namespace ServicingTerminalApplication
         public Login()
         {
             InitializeComponent();
-            linkLabel1.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
+            //linkLabel1.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
             CheckIfThisWindowAllowed();
         }
         private void CheckIfThisWindowAllowed()
         {
-            bool allowed = false;
-            var macAddr = 
-                (
-                from nic in NetworkInterface.GetAllNetworkInterfaces()
-                where nic.OperationalStatus == OperationalStatus.Up
-                select nic.GetPhysicalAddress().ToString())
-                .FirstOrDefault();
-            SqlConnection con = new SqlConnection(connection_string);
-            string query = "select * from Set_Windows where MAC_Address = @param1";
-            SqlDataReader rdr;
-            SqlCommand cmd = new SqlCommand(query, con);
-            cmd.Parameters.AddWithValue("@param1", macAddr);
-            con.Open();
-            rdr = cmd.ExecuteReader();
-            while (rdr.Read())
+            try
             {
-                _window = (int)rdr["Window"];
-                _servicing_office_id = (int)rdr["Servicing_Office_ID"];
-                _servicing_office_name = (string)rdr["Name"];
-                allowed = true;
+                bool allowed = false;
+                var macAddr =
+                    (
+                    from nic in NetworkInterface.GetAllNetworkInterfaces()
+                    where nic.OperationalStatus == OperationalStatus.Up
+                    select nic.GetPhysicalAddress().ToString())
+                    .FirstOrDefault();
+                SqlConnection con = new SqlConnection(connection_string);
+                string query = "select * from Set_Windows where MAC_Address = @param1";
+                SqlDataReader rdr;
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@param1", macAddr);
+                con.Open();
+                rdr = cmd.ExecuteReader();
+                while (rdr.Read())
+                {
+                    _window = (int)rdr["Window"];
+                    _servicing_office_id = (int)rdr["Servicing_Office_ID"];
+                    _servicing_office_name = (string)rdr["Name"];
+                    allowed = true;
+                }
+                con.Close();
+                // MessageBox.Show("select * from Set_Windows where MAC_Address = " + macAddr);
+                if (!allowed)
+                {
+                    MessageBox.Show("This window is not set up yet. Please contact an administrator.", "Unknown Instance");
+                    Environment.Exit(0);
+                }
             }
-            con.Close();
-            // MessageBox.Show("select * from Set_Windows where MAC_Address = " + macAddr);
-            if (!allowed)
+            catch (SqlException aa)
             {
-                MessageBox.Show("This window is not set up yet. Please contact an administrator.","Unknown Instance");
+                MessageBox.Show("Can't connect to database.", "Local connection error!");
                 Environment.Exit(0);
             }
         }
