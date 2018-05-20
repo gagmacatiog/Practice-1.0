@@ -41,7 +41,6 @@
             this.pictureBoxViewHold = new System.Windows.Forms.Button();
             this.info_background = new System.Windows.Forms.PictureBox();
             this.button1 = new System.Windows.Forms.Button();
-            this.pictureBoxStop = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.info_background)).BeginInit();
@@ -132,7 +131,7 @@
             this.pictureBoxNEXT.ForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.pictureBoxNEXT.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxNEXT.Image")));
             this.pictureBoxNEXT.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.pictureBoxNEXT.Location = new System.Drawing.Point(0, 227);
+            this.pictureBoxNEXT.Location = new System.Drawing.Point(32, 225);
             this.pictureBoxNEXT.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBoxNEXT.Name = "pictureBoxNEXT";
             this.pictureBoxNEXT.Size = new System.Drawing.Size(104, 75);
@@ -151,7 +150,7 @@
             this.pictureBoxDELETE.ForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.pictureBoxDELETE.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxDELETE.Image")));
             this.pictureBoxDELETE.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.pictureBoxDELETE.Location = new System.Drawing.Point(102, 228);
+            this.pictureBoxDELETE.Location = new System.Drawing.Point(144, 225);
             this.pictureBoxDELETE.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBoxDELETE.Name = "pictureBoxDELETE";
             this.pictureBoxDELETE.Size = new System.Drawing.Size(104, 75);
@@ -170,7 +169,7 @@
             this.pictureBoxHOLD.ForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.pictureBoxHOLD.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxHOLD.Image")));
             this.pictureBoxHOLD.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.pictureBoxHOLD.Location = new System.Drawing.Point(214, 226);
+            this.pictureBoxHOLD.Location = new System.Drawing.Point(256, 225);
             this.pictureBoxHOLD.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBoxHOLD.Name = "pictureBoxHOLD";
             this.pictureBoxHOLD.Size = new System.Drawing.Size(104, 75);
@@ -189,7 +188,7 @@
             this.pictureBoxViewHold.ForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.pictureBoxViewHold.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxViewHold.Image")));
             this.pictureBoxViewHold.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.pictureBoxViewHold.Location = new System.Drawing.Point(326, 225);
+            this.pictureBoxViewHold.Location = new System.Drawing.Point(368, 225);
             this.pictureBoxViewHold.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBoxViewHold.Name = "pictureBoxViewHold";
             this.pictureBoxViewHold.Size = new System.Drawing.Size(104, 75);
@@ -220,7 +219,7 @@
             this.button1.ForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.button1.Image = ((System.Drawing.Image)(resources.GetObject("button1.Image")));
             this.button1.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.button1.Location = new System.Drawing.Point(539, 225);
+            this.button1.Location = new System.Drawing.Point(480, 225);
             this.button1.Margin = new System.Windows.Forms.Padding(4);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(104, 75);
@@ -229,25 +228,6 @@
             this.button1.TextAlign = System.Drawing.ContentAlignment.BottomRight;
             this.button1.UseVisualStyleBackColor = false;
             this.button1.Click += new System.EventHandler(this.button1_Click_1);
-            // 
-            // pictureBoxStop
-            // 
-            this.pictureBoxStop.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBoxStop.FlatAppearance.BorderSize = 0;
-            this.pictureBoxStop.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.pictureBoxStop.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.pictureBoxStop.ForeColor = System.Drawing.SystemColors.InactiveCaptionText;
-            this.pictureBoxStop.Image = global::ServicingTerminalApplication.Properties.Resources.STOP;
-            this.pictureBoxStop.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.pictureBoxStop.Location = new System.Drawing.Point(438, 225);
-            this.pictureBoxStop.Margin = new System.Windows.Forms.Padding(4);
-            this.pictureBoxStop.Name = "pictureBoxStop";
-            this.pictureBoxStop.Size = new System.Drawing.Size(104, 75);
-            this.pictureBoxStop.TabIndex = 15;
-            this.pictureBoxStop.Text = "Stop";
-            this.pictureBoxStop.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.pictureBoxStop.UseVisualStyleBackColor = false;
-            this.pictureBoxStop.Click += new System.EventHandler(this.pictureBoxStop_Click);
             // 
             // button2
             // 
@@ -258,7 +238,7 @@
             this.button2.ForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.button2.Image = global::ServicingTerminalApplication.Properties.Resources.logoutBtn;
             this.button2.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.button2.Location = new System.Drawing.Point(645, 225);
+            this.button2.Location = new System.Drawing.Point(592, 225);
             this.button2.Margin = new System.Windows.Forms.Padding(4);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(104, 75);
@@ -276,7 +256,6 @@
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(749, 315);
             this.Controls.Add(this.button2);
-            this.Controls.Add(this.pictureBoxStop);
             this.Controls.Add(this.pictureBoxNEXT);
             this.Controls.Add(this.pictureBoxDELETE);
             this.Controls.Add(this.pictureBoxHOLD);
@@ -297,6 +276,7 @@
             this.Text = "Terminal Controller";
             this.TopMost = true;
             this.TransparencyKey = System.Drawing.Color.DarkRed;
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.info_background)).EndInit();
@@ -318,7 +298,6 @@
         private System.Windows.Forms.Button pictureBoxHOLD;
         private System.Windows.Forms.Button pictureBoxDELETE;
         private System.Windows.Forms.Button pictureBoxNEXT;
-        private System.Windows.Forms.Button pictureBoxStop;
         private System.Windows.Forms.Button button2;
     }
 }

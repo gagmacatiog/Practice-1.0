@@ -157,6 +157,7 @@ namespace ServicingTerminalApplication
         }
         public void updateCustomerInfoShown(_Main_Queue thisCustomer)
         {
+            z("Showing new customer_info with CQN of "+thisCustomer.Customer_Queue_Number);
             textCQN.Text = thisCustomer.Customer_Queue_Number.ToString();
             textType.Text = thisCustomer.Type;
             textID.Text = thisCustomer.Student_No;
@@ -586,7 +587,7 @@ namespace ServicingTerminalApplication
                 }
             }
             retrieved_counter++;
-            Console.WriteLine("if {0} < {1}", retrieved_counter, count_walkin);
+            z("if " + retrieved_counter+"  <  "+count_walkin+", retrieved_counter, count_walkin");
             if (retrieved_counter < count_walkin)
             {
                 
@@ -663,15 +664,15 @@ namespace ServicingTerminalApplication
             if (((Button)sender) == pictureBoxNEXT)
             {
                 // If next button is clicked
-                Console.WriteLine(" START ------------------- NEXT --------------------");
+                z(" START ------------------- NEXT --------------------");
                 Next();
-                Console.WriteLine(" END ------------------- NEXT --------------------");
+                z(" END ------------------- NEXT --------------------");
             }
             else if (((Button)sender) == pictureBoxDELETE)
             {
                 // If delete button is clicked
                 // Delete the customer
-                Console.WriteLine(" START ------------------- DELETE --------------------");
+                z(" START ------------------- DELETE --------------------");
                 var confirmResult = MessageBox.Show("Are you sure to delete this queue?",
                                      "Delete?",
                                      MessageBoxButtons.YesNo);
@@ -687,49 +688,56 @@ namespace ServicingTerminalApplication
                         String QUERY_delete_MainQueue_onNext = "delete from Main_Queue where id = @param_unique_id";
                         deleteCommand = new SqlCommand(QUERY_delete_MainQueue_onNext, con);
                         deleteCommand.Parameters.AddWithValue("@param_unique_id", Next_Customer.ID);
-                        Console.WriteLine("Deleting from Table: Main_Queue with id of " + Next_Customer.ID);
-                        Console.WriteLine("Customer id#" + Next_Customer.ID + " deleted!");
+                        z("Deleting from Table: Main_Queue with id of " + Next_Customer.ID);
+                        z("Customer id#" + Next_Customer.ID + " deleted!");
                         deleteCommand.ExecuteNonQuery();
-                        Console.WriteLine("Real customer is deleted.");
+                        z("Real customer is deleted.");
 
-                        firebase_Connection fcon = new firebase_Connection();
-                        fcon.User_SetToInactive(Previous_Customer.Student_No);
+                        try
+                        {
+                            firebase_Connection fcon = new firebase_Connection();
+                            fcon.User_SetToInactive(Previous_Customer.Student_No);
+                        }
+                        catch (FirebaseException) { }
+                        WriteToControllerLog(" is now deleted from queue.");
                     }
                     else
                     {
-                        Console.WriteLine("Previous customer is a null.");
-                        Console.WriteLine("NULL Customer is ignored. Nothing is deleted");
+                        z("Previous customer is a null.");
+                        z("NULL Customer is ignored. Nothing is deleted");
                     }
                     Next_Customer = No_Customer;
                     Previous_Customer = No_Customer;
+                    updateCustomerInfoShown(No_Customer);
                     con.Close();
                 }
                 else
                 {
                     // If 'No', do something here.
                 }
-                Console.WriteLine(" END ------------------- DELETE --------------------");
+                z(" END ------------------- DELETE --------------------");
             }
             else if (((Button)sender) == pictureBoxHOLD)
             {
 
-                Console.WriteLine(" START ------------------- HOLD --------------------");
+                z(" START ------------------- HOLD --------------------");
+                WriteToControllerLog(" is now on hold by "+PROGRAM_Servicing_Office_Name+ " at Window "+PROGRAM_window);
                 HoldThisCustomer();
-                Console.WriteLine(" END ------------------- HOLD --------------------");
+                z(" END ------------------- HOLD --------------------");
             }
             else if (((Button)sender) == pictureBoxViewHold)
             {
 
-                Console.WriteLine(" START ------------------- HOLD-FORM --------------------");
+                z(" START ------------------- HOLD-FORM --------------------");
                 RefreshHoldList();
                 frmHoldCustomers = new FormHoldCustomers(LIST_Customers_On_Hold);
                 frmHoldCustomers.StartPosition = FormStartPosition.CenterScreen;
                 frmHoldCustomers.ShowDialog();
-                Console.WriteLine(" END ------------------- HOLD-FORM --------------------");
+                z(" END ------------------- HOLD-FORM --------------------");
             }
             else
             {
-                Console.WriteLine("onMouseClick does not know what picturebox called it.");
+                z("onMouseClick does not know what picturebox called it.");
                 // do nothing
             }
         }
@@ -760,6 +768,35 @@ namespace ServicingTerminalApplication
         #endregion
 
         #region MAIN METHODS
+        private void CustomerNowServingWrite(string subtext)
+        {
+            // write to serving info
+            SqlConnection con = new SqlConnection(connection_string);
+            con.Open();
+            String QUERY_create_newServingInfo = "insert into Serving_Info (Customer_Queue_Number,Window,Servicing_Office_Name,Servicing_Office,Customer_From) values " +
+                     " (@param1,@param2,@param_so_n,@param_so,@param_from)";
+            SqlCommand Command8 = new SqlCommand(QUERY_create_newServingInfo, con);
+            Command8.Parameters.AddWithValue("@param1", Next_Customer.Customer_Queue_Number);
+            Command8.Parameters.AddWithValue("@param2", PROGRAM_window);
+            Command8.Parameters.AddWithValue("@param_so_n", PROGRAM_Servicing_Office_Name);
+            Command8.Parameters.AddWithValue("@param_so", Next_Customer.Servicing_Office);
+            Command8.Parameters.AddWithValue("@param_from", Next_Customer.Customer_From);
+            Command8.ExecuteNonQuery();
+            con.Close();
+            WriteToControllerLog(subtext);
+        }
+        private void WriteToControllerLog(string subtext)
+        {
+            SqlConnection con = new SqlConnection(connection_string);
+            con.Open();
+            // write to Controller_Queue_log
+            String QUERY_create_newControllerLog = "insert into Controller_Queue_Log (Log_Title,Log_Text) values (@param1,@param2)";
+            SqlCommand Command9 = new SqlCommand(QUERY_create_newControllerLog, con);
+            Command9.Parameters.AddWithValue("@param1", "Serve");
+            Command9.Parameters.AddWithValue("@param2", Next_Customer.Customer_Queue_Number + subtext);
+            Command9.ExecuteNonQuery();
+            con.Close();
+        }
         private void HoldThisCustomer()
         {
             if (Next_Customer.ID > 0)
@@ -767,7 +804,7 @@ namespace ServicingTerminalApplication
                 string q = "Hold_Customer is " + Hold_Customer.Customer_Queue_Number + Environment.NewLine
                     + "Next_Customer is " + Next_Customer.Customer_Queue_Number + Environment.NewLine
                     + "Previous_Customer is " + Previous_Customer.Customer_Queue_Number + Environment.NewLine;
-                Console.WriteLine(q);
+                z(q);
                 Hold_Customer = Next_Customer;
                 Next_Customer = No_Customer;
                 Previous_Customer = No_Customer;
@@ -779,7 +816,7 @@ namespace ServicingTerminalApplication
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@param1", "Hold");
                 cmd.Parameters.AddWithValue("@paramcqn", Hold_Customer.Customer_Queue_Number);
-                Console.WriteLine(""+cmd.ExecuteScalar().ToString());
+                z(""+cmd.ExecuteScalar().ToString());
 
                 
                 RefreshHoldList();
@@ -787,12 +824,12 @@ namespace ServicingTerminalApplication
 
                 con.Close();
 
-                Console.WriteLine("update Main_Queue set Queue_Status = Hold where id = {0}", Hold_Customer.Customer_Queue_Number);
+                z("update Main_Queue set Queue_Status = Hold where id = Hold_Customer.Customer_Queue_Number");
                 MessageBox.Show(Hold_Customer.Full_Name+" is now on hold.");
             }
             else
             {
-                Console.WriteLine("Customer currently serving is NULL.");
+                z("Customer currently serving is NULL.");
             }
             Console.WriteLine(w_temp_run);
             w_temp_run = string.Empty;
@@ -826,25 +863,27 @@ namespace ServicingTerminalApplication
                 {
                     Command1.CommandText = QUERY_next_customer_online;
                     Command1.Parameters.AddWithValue("@param_cf", 1);
+                    z("Customer from is 1");
                 }
                 else
                 {
                     Command1.CommandText = QUERY_next_customer_mq;
                     Command1.Parameters.AddWithValue("@param_cf", 0);
+                    Console.WriteLine("Customer from is 0");
                 }
 
                 Command1.Parameters.AddWithValue("@param_so", PROGRAM_Servicing_Office);
                 Command1.Parameters.AddWithValue("@param_qs", "Waiting");
                 PROGRAM_ServeMobileCustomer = false;
-                
-                
+
+                z(Command1.CommandText + " PROGRAM_Servicing_Office -> Customer = Waiting");
                 Reader1 = Command1.ExecuteReader();
 
                 while (Reader1.Read())
                 {
                     _READ_COUNTER = true;
                     z("Customer found on Local (Normal)");
-                    Console.WriteLine("?->" + Reader1["Customer_From"]);
+                    z("?->" + Reader1["Customer_From"]);
                     Next_Customer = new _Main_Queue
                     {
                         Queue_Number = (int)Reader1["Queue_Number"],
@@ -863,10 +902,10 @@ namespace ServicingTerminalApplication
                     CommandQuickUpdate.Parameters.AddWithValue("@param_qs", "Serving");
                     CommandQuickUpdate.Parameters.AddWithValue("@param_uniqueid", (int)Reader1["id"]);
                     CommandQuickUpdate.ExecuteNonQuery();
-                    Console.WriteLine("Customer is now " + Next_Customer.Customer_Queue_Number);
+                    z("Customer is now " + Next_Customer.Customer_Queue_Number);
 
                 }
-                Console.WriteLine("////////////////////{0} {1}", _READ_COUNTER, PROGRAM_ServeMobileCustomer);
+                z("Read Someone? "+ _READ_COUNTER+", A Mobile Customer? "+ PROGRAM_ServeMobileCustomer);
                 if (!_READ_COUNTER && PROGRAM_ServeMobileCustomer)
                 {
                     // If it did not received mobile customers because there were none on the Main_Queue,
@@ -881,7 +920,7 @@ namespace ServicingTerminalApplication
                     {
                         _READ_COUNTER = true;
                         z("Customer found on Local (no more mobile)");
-                        Console.WriteLine("?->" + Reader2["Customer_From"]);
+                        z("?->" + Reader2["Customer_From"]);
                         Next_Customer = new _Main_Queue
                         {
                             Queue_Number = (int)Reader2["Queue_Number"],
@@ -900,7 +939,7 @@ namespace ServicingTerminalApplication
                         CommandQuickUpdate.Parameters.AddWithValue("@param_qs", "Serving");
                         CommandQuickUpdate.Parameters.AddWithValue("@param_uniqueid", (int)Reader2["id"]);
                         CommandQuickUpdate.ExecuteNonQuery();
-                        Console.WriteLine("Customer is now " + Next_Customer.Customer_Queue_Number);
+                        z("Customer is now " + Next_Customer.Customer_Queue_Number);
 
                     }
                     Command2.Dispose();
@@ -918,7 +957,7 @@ namespace ServicingTerminalApplication
                     {
                         _READ_COUNTER = true;
                         z("Customer found on Mobile (no more local)");
-                        Console.WriteLine("?->" + Reader3["Customer_From"]);
+                        z("?->" + Reader3["Customer_From"]);
                         Next_Customer = new _Main_Queue
                         {
                             Queue_Number = (int)Reader3["Queue_Number"],
@@ -937,44 +976,12 @@ namespace ServicingTerminalApplication
                         CommandQuickUpdate.Parameters.AddWithValue("@param_qs", "Serving");
                         CommandQuickUpdate.Parameters.AddWithValue("@param_uniqueid", (int)Reader3["id"]);
                         CommandQuickUpdate.ExecuteNonQuery();
-                        Console.WriteLine("Customer is now " + Next_Customer.Customer_Queue_Number);
+                        z("Customer is now " + Next_Customer.Customer_Queue_Number);
 
                     }
                     Command3.Dispose();
                 }
-                //if (!_READ_COUNTER)
-                //{
-                //    Command2 = new SqlCommand(QUERY_next_customer_mobile, con);
-                //    Command2.Parameters.AddWithValue("@param_so", PROGRAM_Servicing_Office);
-                //    Command2.Parameters.AddWithValue("@param_qs", "Waiting");
-                //    Reader2 = Command2.ExecuteReader();
-
-                //    while (Reader2.Read())
-                //    {
-                //        z("read found on transfer queue");
-                //        _READ_COUNTER = true;
-                //        Next_Customer = new _Main_Queue
-                //        {
-                //            Queue_Number = (int)Reader2["Queue_Number"],
-                //            Full_Name = (string)Reader2["Full_Name"],
-                //            Servicing_Office = (int)Reader2["Servicing_Office"],
-                //            Transaction_Type = (int)Reader2["Transaction_Type"],
-                //            Type = ((Boolean)Reader2["Type"] == false) ? "Student" : "Guest",
-                //            Customer_From = ((Boolean)Reader2["Customer_From"] == false) ? "Local" : "Mobile",
-                //            Customer_Queue_Number = (string)Reader2["Customer_Queue_Number"],
-                //            ID = (int)Reader2["Main_Queue_ID"],
-                //            Student_No = ((Boolean)Reader1["Type"] == false) ? (string)Reader1["Student_No"] : "",
-                //            Pattern_Current = (int)Reader2["Pattern_Current"],
-                //            Transfer_Customer = true
-                //        };
-                //        CommandQuickUpdate = new SqlCommand(QUERY_tq_next_customer_update_on_success, con);
-                //        CommandQuickUpdate.Parameters.AddWithValue("@param_qs", "Serving");
-                //        CommandQuickUpdate.Parameters.AddWithValue("@param_uniqueid", (int)Reader2["id"]);
-                //        CommandQuickUpdate.ExecuteNonQuery();
-                //    }
-                //    if (_READ_COUNTER) MessageBox.Show("Customer found on Transfer Table.");
-                //}
-                if (!_READ_COUNTER) Console.WriteLine("No customers found on queue.");
+                if (!_READ_COUNTER) z("No customers found on queue.");
 
                 // Check if timer run a little bit last time = there was a customer
                 if (_SERVING_TIME.Elapsed.Milliseconds > 0)
@@ -1092,7 +1099,8 @@ namespace ServicingTerminalApplication
 
                     Command_Update_svc_tmnl.ExecuteNonQuery();
 
-
+                    CustomerNowServingWrite(" to "+PROGRAM_Servicing_Office_Name + " at Window "+PROGRAM_window+".");
+                    /*
                     String QUERY_create_newServingInfo = "insert into Serving_Info (Customer_Queue_Number,Window,Servicing_Office_Name,Servicing_Office,Customer_From) values " +
                         " (@param1,@param2,@param_so_n,@param_so,@param_from)";
                     SqlCommand Command8 = new SqlCommand(QUERY_create_newServingInfo,con);
@@ -1101,7 +1109,7 @@ namespace ServicingTerminalApplication
                     Command8.Parameters.AddWithValue("@param_so_n", PROGRAM_Servicing_Office_Name);
                     Command8.Parameters.AddWithValue("@param_so", Next_Customer.Servicing_Office);
                     Command8.Parameters.AddWithValue("@param_from", Next_Customer.Customer_From);
-                    Command8.ExecuteNonQuery();
+                    Command8.ExecuteNonQuery();*/
                     z("Updating Queue_Info when next is clicked finished!");
 
                     
@@ -1134,7 +1142,7 @@ namespace ServicingTerminalApplication
                     String QUERY_delete_MainQueue_onNext = "delete from Main_Queue where id = @param_unique_id";
                     deleteCommand = new SqlCommand(QUERY_delete_MainQueue_onNext, con);
                     deleteCommand.Parameters.AddWithValue("@param_unique_id", Previous_Customer.ID);
-                    z("Deleting from Table: Main_Queue with id of " + Previous_Customer.ID);
+                    z("Deleting from Table: Main_Queue with id of " + Previous_Customer.ID + " CQN OF  " + Previous_Customer.Customer_Queue_Number);
                     z("Customer id#" + Previous_Customer.ID + " deleted!");
                     deleteCommand.ExecuteNonQuery();
                     if (Previous_Customer.Type == "Student")
@@ -1217,7 +1225,7 @@ namespace ServicingTerminalApplication
 
 
                 Next_Customer = Hold_Customer;
-                Console.WriteLine("Customer is now " + Next_Customer.Customer_Queue_Number);
+                z("Customer is now " + Next_Customer.Customer_Queue_Number);
 
                 // Check if timer run a little bit last time = there was a customer
                 if (_SERVING_TIME.Elapsed.Milliseconds > 0)
@@ -1320,16 +1328,16 @@ namespace ServicingTerminalApplication
 
                 Command_Update_svc_tmnl.ExecuteNonQuery();
 
-
-                String QUERY_create_newServingInfo = "insert into Serving_Info (Customer_Queue_Number,Window,Servicing_Office_Name,Servicing_Info,Customer_From) values " +
-                    " (@param1,@param2,@param_so_n,@param_so)";
+                CustomerNowServingWrite(" now serving from hold to "+PROGRAM_Servicing_Office_Name+" at window "+PROGRAM_window+"." );
+                /*String QUERY_create_newServingInfo = "insert into Serving_Info (Customer_Queue_Number,Window,Servicing_Office_Name,Servicing_Info,Customer_From) values " +
+                    " (@param1,@param2,@param_so_n,@param_so,@param_from)";
                 SqlCommand Command8 = new SqlCommand(QUERY_create_newServingInfo, con);
                 Command8.Parameters.AddWithValue("@param1", Next_Customer.Customer_Queue_Number);
                 Command8.Parameters.AddWithValue("@param2", PROGRAM_window);
                 Command8.Parameters.AddWithValue("@param_so_n", PROGRAM_Servicing_Office_Name);
                 Command8.Parameters.AddWithValue("@param_so", Next_Customer.Servicing_Office);
                 Command8.Parameters.AddWithValue("@param_from", Next_Customer.Customer_From);
-                Command8.ExecuteNonQuery();
+                Command8.ExecuteNonQuery();*/
                 z("Updating Queue_Info when next is clicked finished!");
 
                 con.Close();
@@ -1384,16 +1392,43 @@ namespace ServicingTerminalApplication
                 cmd.Parameters.AddWithValue("@param1", so_name);
                 cmd.Parameters.AddWithValue("@param3", trans_name);
                 cmd.Parameters.AddWithValue("@param4", Next_Customer.Type);
+                cmd.Parameters.AddWithValue("@param_so", Next_Customer.Servicing_Office);
                 cmd.ExecuteNonQuery();
             }
             con.Close();
 
         }
-        private void pictureBoxStop_Click(object sender, EventArgs e)
+        private void logOut()
         {
-            Console.WriteLine("picturebox");
-            SqlConnection con = new SqlConnection(connection_string);
-            con.Open();
+            var confirmResult = MessageBox.Show("Are you sure to log out?",
+                                        "Confirm Logout",
+                                        MessageBoxButtons.YesNo);
+            if (confirmResult == DialogResult.Yes)
+            {
+                // If 'Yes', do something here.
+                SqlConnection con = new SqlConnection(connection_string);
+                string QUERY_DeleteServicingTerminal = "delete from Servicing_Terminal where Name = @param0 AND Servicing_Office = @param2 AND Window = @param3";
+                SqlCommand add_svc_tmnl = new SqlCommand(QUERY_DeleteServicingTerminal, con);
+                add_svc_tmnl.Parameters.AddWithValue("@param0", PROGRAM_Servicing_Office_Name);
+                add_svc_tmnl.Parameters.AddWithValue("@param2", PROGRAM_Servicing_Office);
+                add_svc_tmnl.Parameters.AddWithValue("@param3", PROGRAM_window);
+
+                con.Open();
+                add_svc_tmnl.ExecuteNonQuery();
+                logOut_MoveCustomerToNextOrDelete(con);
+                con.Close();
+
+                Application.Exit();
+            }
+            else
+            {
+                // If 'No', do something here.
+            }
+        }
+        private void logOut_MoveCustomerToNextOrDelete(SqlConnection con)
+        {
+            z("Stop clicked");
+            //button2_Click(object sender,EventArgs e);
 
             // Move the current customer
             Next_Customer.Pattern_Current++;
@@ -1461,9 +1496,21 @@ namespace ServicingTerminalApplication
 
             // clear items
             Previous_Customer = No_Customer;
-            Next_Customer = No_Customer;
+            Next_Customer = new _Main_Queue();
             updateCustomerInfoShown(Clear_Customer);
-            con.Close();
+        }
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                if (e.CloseReason == CloseReason.UserClosing)
+                    e.Cancel = MessageBox.Show(@"Please use log-out instead of closing this form."+Environment.NewLine+"If you want to close anyway, click Yes.",
+                                               "Warning!",
+                                               MessageBoxButtons.YesNo) == DialogResult.No;
+                if (!e.Cancel) { Application.Exit(); }
+                else { }
+                Console.WriteLine("!!! e.Cancel =" + e.Cancel);
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -1473,35 +1520,7 @@ namespace ServicingTerminalApplication
 
         private void button2_Click(object sender, EventArgs e)
         {
-            var confirmResult = MessageBox.Show("Are you sure to log out?",
-                                        "Confirm Logout",
-                                        MessageBoxButtons.YesNo);
-            if (confirmResult == DialogResult.Yes)
-            {
-                // If 'Yes', do something here.
-                SqlConnection con = new SqlConnection(connection_string);
-                string QUERY_DeleteServicingTerminal = "delete from Servicing_Terminal where Name = @param0 AND Servicing_Office = @param2 AND Window = @param3";
-                SqlCommand add_svc_tmnl = new SqlCommand(QUERY_DeleteServicingTerminal, con);
-                add_svc_tmnl.Parameters.AddWithValue("@param0", PROGRAM_Servicing_Office_Name);
-                add_svc_tmnl.Parameters.AddWithValue("@param2", PROGRAM_Servicing_Office);
-                add_svc_tmnl.Parameters.AddWithValue("@param3", PROGRAM_window);
-
-                con.Open();
-                add_svc_tmnl.ExecuteNonQuery();
-                con.Close();
-
-                Application.Exit();
-                //new Login().Show();
-                //this.Hide();
-                //if (mainForm != null)
-                //    mainForm.Close();
-                //if (customerForm != null)
-                //    customerForm.Close();
-            }
-            else
-            {
-                // If 'No', do something here.
-            }
+            logOut();
         }
     }
 }
